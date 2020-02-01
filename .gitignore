@@ -1,0 +1,14 @@
+.idea
+*.log
+__pycache__
+env
+*.pyc
+keys.json
+decom
+data
+test*
+data.zip
+venv
+*.db
+*.vscode
+.vscode/settings.json
