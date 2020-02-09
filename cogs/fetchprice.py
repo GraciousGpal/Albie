@@ -54,7 +54,7 @@ class FetchPrice(commands.Cog):
         self.locationURL = "?locations=Caerleon,Lymhurst,Martlock,Bridgewatch,FortSterling,Thetford,ArthursRest,MerlynsRest,MorganasRest,BlackMarket"
         self.iconURL = "https://gameinfo.albiononline.com/api/gameinfo/items/"
         self.historyURL = "https://www.albion-online-data.com/api/v1/stats/charts/"
-        self.historyLocationURL = "&locations=Thetford,Martlock,Caerleon,Lymhurst,Bridgewatch,FortSterling,ArthursRest,MerlynsRest,MorganasRest,BlackMarket"
+        self.historyLocationURL = "&locations=Thetford,Martlock,Caerleon,Lymhurst,Bridgewatch,FortSterling,ArthursRest,MerlynsRest,MorganasRest"
 
         # Bot will search items through this list
         # There are also different localization names
