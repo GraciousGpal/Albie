@@ -7,14 +7,17 @@ import configparser
 
 
 # Load config.ini
+currentPath = os.path.dirname(os.path.realpath(__file__))
 configs = configparser.ConfigParser()
-configs.read("config.ini")
+configs.read(currentPath + "/config.ini")
 
 # adminUsers gets to load/unload/reload cogs
 adminUsers = configs["General"]["adminUsers"].replace("'", "").split(", ")
 commandPrefix = configs["General"]["commandPrefix"].replace("'", "").split(", ")
 
-client = commands.Bot(command_prefix=commandPrefix)
+client = commands.Bot(
+    command_prefix=commands.when_mentioned_or(*commandPrefix), case_insensitive=True
+)
 
 # Set up logging to discord.log
 logger = logging.getLogger("discord")
@@ -44,7 +47,7 @@ async def on_ready():
 
     # Load cogs in folder /cogs
     try:
-        for filename in os.listdir("./cogs"):
+        for filename in os.listdir(currentPath + "/cogs"):
             if filename.endswith(".py"):
                 client.load_extension(f"cogs.{filename[:-3]}")
     except Exception as e:

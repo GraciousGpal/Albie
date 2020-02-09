@@ -4,10 +4,11 @@ import urllib.request
 import json
 import datetime as DT
 import statistics
-from difflib import SequenceMatcher
+import difflib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import configparser
+import os
 
 
 class FetchPrice(commands.Cog):
@@ -23,7 +24,7 @@ class FetchPrice(commands.Cog):
     Functions:
         - item_match(item)
             Find closest matching item name/ID of input item.
-            Uses Jaccard distance or difflib.
+            Uses difflib.
             Returns first 4 closest match.
         - grabHistory(item)
             Get item's 7 days historical prices for all cities.
@@ -34,8 +35,9 @@ class FetchPrice(commands.Cog):
         self.client = client
 
         # Load config.ini and get configs
+        currentPath = os.path.dirname(os.path.realpath(__file__))
         configs = configparser.ConfigParser()
-        configs.read("./config.ini")
+        configs.read(os.path.dirname(currentPath) + "/config.ini")
 
         debugChannel = int(configs["Channels"]["debugChannelID"])
         workChannel = [
@@ -49,43 +51,30 @@ class FetchPrice(commands.Cog):
 
         # API URLs
         self.apiURL = "https://www.albion-online-data.com/api/v2/stats/prices/"
-        self.locationURL = (
-            "?locations=Caerleon,Lymhurst,Martlock,Bridgewatch,FortSterling,Thetford"
-        )
+        self.locationURL = "?locations=Caerleon,Lymhurst,Martlock,Bridgewatch,FortSterling,Thetford,ArthursRest,MerlynsRest,MorganasRest,BlackMarket"
         self.iconURL = "https://gameinfo.albiononline.com/api/gameinfo/items/"
         self.historyURL = "https://www.albion-online-data.com/api/v1/stats/charts/"
-        self.historyLocationURL = (
-            "&locations=Thetford,Martlock,Caerleon,Lymhurst,Bridgewatch,FortSterling"
-        )
+        self.historyLocationURL = "&locations=Thetford,Martlock,Caerleon,Lymhurst,Bridgewatch,FortSterling,ArthursRest,MerlynsRest,MorganasRest,BlackMarket"
 
         # Bot will search items through this list
         # There are also different localization names
-        self.itemList = "item_data.json"
+        self.itemList = os.path.dirname(currentPath) + "/item_data.json"
 
     @commands.command(
-        aliases=[
-            "Prices",
-            "price",
-            "Price",
-            "PRICE",
-            "PRICES",
-            "quick",
-            "Quick",
-            "QUICK",
-        ]
+        aliases=["price", "quick",]
     )
     async def prices(self, ctx, *, item):
         """Fetch current prices from Data Project API.
 
         - Usage: <commandPrefix> price <item name>
         - Item name can also be its ID
-        - Uses Jaccard edit distance/difflib for item name recognition.
+        - Uses difflib for item name recognition.
         - Outputs as Discord Embed with thumbnail.
         - Plots 7 days historical prices.
         """
 
         # Get command (price or quick)
-        command = ctx.message.content.split()[1]
+        command = ctx.message.content.split()
 
         # Debug message
         if self.debug:
@@ -98,7 +87,7 @@ class FetchPrice(commands.Cog):
 
         await ctx.channel.trigger_typing()
 
-        # Jaccard edit distance/difflib for input search
+        # difflib for input search
         itemNames, itemIDs = self.item_match(item)
 
         # Grab prices from full URL
@@ -211,7 +200,7 @@ class FetchPrice(commands.Cog):
 
             try:
                 # Skip plotting if command is quick
-                if command.lower() == "quick":
+                if any(["quick" in c.lower() for c in command[:2]]):
                     raise Exception
 
                 # Trigger typing again so that user know its still loading
@@ -243,12 +232,11 @@ class FetchPrice(commands.Cog):
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send("Please specify item.")
 
-    def item_match(self, inputWord, option="difflib"):
+    def item_match(self, inputWord):
         """Find closest matching item name and ID of input item.
 
         - Matches both item ID (UniqueName) and item name (LocalizedNames)
-        - Uses Jaccard distance/difflib. (difflib by default)
-        - I find difflib to be better.
+        - Uses difflib.
         - Returns 4 closest match.
         """
 
@@ -256,8 +244,9 @@ class FetchPrice(commands.Cog):
         itemIDs = []
         jDists = []
 
+        # Open list of items
         try:
-            with open("item_data.json", "r", encoding="utf-8") as inFile:
+            with open(self.itemList, "r", encoding="utf-8") as inFile:
                 data = json.load(inFile)
         except Exception as e:
             print(e)
@@ -271,16 +260,8 @@ class FetchPrice(commands.Cog):
                 w1 = inputWord.lower()
                 w2 = indivData["UniqueName"].lower()
 
-                # Use jaccard or difflib's SequenceMatcher
-                if option == "jaccard":
-                    # Jaccard distance = 1 - (|w1 ∩ w2|/|w1 ∪ w2|)
-                    w1 = set(w1)
-                    w2 = set(w2)
-                    jDist = 1 - (len(w1.intersection(w2)) / len(w1.union(w2)))
-
-                else:
-                    jDist = 1 - SequenceMatcher(None, w1, w2).ratio()
-
+                # Use difflib's SequenceMatcher
+                jDist = 1 - difflib.SequenceMatcher(None, w1, w2).ratio()
                 jDists.append([jDist, i])
 
             # If item has no 'UniqueName'
@@ -291,18 +272,17 @@ class FetchPrice(commands.Cog):
             # Calculate distance for item name (LocalizedNames)
             try:
                 w1 = inputWord.lower()
-                w2 = indivData["LocalizedNames"]["EN-US"].lower()
 
-                # Use jaccard or difflib's SequenceMatcher
-                if option == "jaccard":
-                    # Jaccard distance = 1 - (|w1 ∩ w2|/|w1 ∪ w2|)
-                    w1 = set(w1)
-                    w2 = set(w2)
-                    jDist = 1 - (len(w1.intersection(w2)) / len(w1.union(w2)))
+                # Get distance for all localizations
+                localDists = []
+                for name in indivData["LocalizedNames"]:
+                    w2 = indivData["LocalizedNames"][name].lower()
 
-                else:
-                    jDist = 1 - SequenceMatcher(None, w1, w2).ratio()
+                    localDist = 1 - difflib.SequenceMatcher(None, w1, w2).ratio()
+                    localDists.append(localDist)
 
+                # Pick the closest distance as jDist
+                jDist = min(localDists)
                 jDists.append([jDist, i])
 
             # If item has no 'LocalizedNames'
@@ -339,56 +319,60 @@ class FetchPrice(commands.Cog):
 
             return newData, indices
 
-        # Find dates of past 7 days
+        # Find API URL for past 7 days
         # historyURL requires dates in %m-%d-%Y format
         today = DT.datetime.utcnow()
         numDays = 7
-        dates = [None] * numDays
-        for i in range(1, 1 + numDays):
-            dates[i - 1] = (today - DT.timedelta(days=i)).strftime("%m-%d-%Y")
+        date = (today - DT.timedelta(days=numDays)).strftime("%m-%d-%Y")
+        fullURL = self.historyURL + item + "?date=" + date + self.historyLocationURL
 
-        # List will have 6 different indices for 6 different cities
+        # List will have 10 different indices for 10 different cities
         # The indices corresponds to this ordering of cities (Alphabetical):
-        # Bridgewatch, Caerleon, Fort Sterling, Lymhurst, Martlock, Thetford
-        prices_minAll = [[], [], [], [], [], []]
-        timestampsAll = [[], [], [], [], [], []]
+        # Arthurs, BlackMarket, Bridgewatch, Caerleon, Fort Sterling, Lymhurst, Martlock, Merlyns, Morganas, Thetford
+        prices_minAll = [[], [], [], [], [], [], [], [], [], []]
+        timestampsAll = [[], [], [], [], [], [], [], [], [], []]
 
-        # Retrieve prices and timestamps of each city from each date
-        for date in dates:
+        # Get price
+        try:
+            with urllib.request.urlopen(fullURL) as url:
+                prices = json.loads(url.read().decode())
 
-            # Raise exception if cannot get prices
-            try:
-                fullURL = (
-                    self.historyURL + item + "?date=" + date + self.historyLocationURL
-                )
-                with urllib.request.urlopen(fullURL) as url:
-                    prices = json.loads(url.read().decode())
-            except Exception as e:
-                print(e)
-                return
+        except Exception as e:
+            print(e)
+            return
 
-            else:
-                # Iterates over each city's prices
-                # and extend data to their corresponding index
-                for price in prices:
-                    if price["location"] == "Bridgewatch":
-                        prices_minAll[0].extend(price["data"]["prices_min"])
-                        timestampsAll[0].extend(price["data"]["timestamps"])
-                    elif price["location"] == "Caerleon":
-                        prices_minAll[1].extend(price["data"]["prices_min"])
-                        timestampsAll[1].extend(price["data"]["timestamps"])
-                    elif price["location"] == "Fort Sterling":
-                        prices_minAll[2].extend(price["data"]["prices_min"])
-                        timestampsAll[2].extend(price["data"]["timestamps"])
-                    elif price["location"] == "Lymhurst":
-                        prices_minAll[3].extend(price["data"]["prices_min"])
-                        timestampsAll[3].extend(price["data"]["timestamps"])
-                    elif price["location"] == "Martlock":
-                        prices_minAll[4].extend(price["data"]["prices_min"])
-                        timestampsAll[4].extend(price["data"]["timestamps"])
-                    elif price["location"] == "Thetford":
-                        prices_minAll[5].extend(price["data"]["prices_min"])
-                        timestampsAll[5].extend(price["data"]["timestamps"])
+        else:
+            for price in prices:
+                if price["location"] == "Arthurs Rest":
+                    prices_minAll[0].extend(price["data"]["prices_min"])
+                    timestampsAll[0].extend(price["data"]["timestamps"])
+                elif price["location"] == "Black Market":
+                    prices_minAll[1].extend(price["data"]["prices_min"])
+                    timestampsAll[1].extend(price["data"]["timestamps"])
+                elif price["location"] == "Bridgewatch":
+                    prices_minAll[2].extend(price["data"]["prices_min"])
+                    timestampsAll[2].extend(price["data"]["timestamps"])
+                elif price["location"] == "Caerleon":
+                    prices_minAll[3].extend(price["data"]["prices_min"])
+                    timestampsAll[3].extend(price["data"]["timestamps"])
+                elif price["location"] == "Fort Sterling":
+                    prices_minAll[4].extend(price["data"]["prices_min"])
+                    timestampsAll[4].extend(price["data"]["timestamps"])
+                elif price["location"] == "Lymhurst":
+                    prices_minAll[5].extend(price["data"]["prices_min"])
+                    timestampsAll[5].extend(price["data"]["timestamps"])
+                elif price["location"] == "Martlock":
+                    prices_minAll[6].extend(price["data"]["prices_min"])
+                    timestampsAll[6].extend(price["data"]["timestamps"])
+                elif price["location"] == "Merlyns Rest":
+                    prices_minAll[7].extend(price["data"]["prices_min"])
+                    timestampsAll[7].extend(price["data"]["timestamps"])
+                elif price["location"] == "Morganas Rest":
+                    prices_minAll[8].extend(price["data"]["prices_min"])
+                    timestampsAll[8].extend(price["data"]["timestamps"])
+                elif price["location"] == "Thetford":
+                    prices_minAll[9].extend(price["data"]["prices_min"])
+                    timestampsAll[9].extend(price["data"]["timestamps"])
 
         # Convert timestamps from epochs to datetime format
         # Timestamp data are 1000 times larger for some reason
@@ -409,18 +393,33 @@ class FetchPrice(commands.Cog):
 
         # Plot the data
         plt.style.use("seaborn")
-        fig = plt.figure(figsize=(10, 5))
+        plt.figure(figsize=(10, 6))
 
         # Plot labels and plot colors
         names = [
+            "Arthur's Rest",
+            "Black Market",
             "Bridgewatch",
             "Caerleon",
             "Fort Sterling",
             "Lymhurst",
             "Martlock",
+            "Merlyn's Rest",
+            "Morgana's Rest",
             "Thetford",
         ]
-        colors = ["orange", "black", "silver", "green", "blue", "brown"]
+        colors = [
+            "red",
+            "rosybrown",
+            "orange",
+            "black",
+            "silver",
+            "forestgreen",
+            "blue",
+            "darkturquoise",
+            "purple",
+            "brown",
+        ]
 
         # Settings for date xaxis
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%m/%d/%Y"))
@@ -429,18 +428,20 @@ class FetchPrice(commands.Cog):
         # Iterate over all cities and plot each one
         for (i, timestamps) in enumerate(timestampsAll):
             try:
-                # Sort data first in ascending timestamps
-                x, y = [
-                    list(x)
-                    for x in zip(
-                        *sorted(
-                            zip(timestampsAll[i], prices_minAll[i]),
-                            key=lambda pair: pair[0],
+                if i not in (0, 7, 8):
+                    # Sort data first in ascending timestamps
+                    x, y = [
+                        list(x)
+                        for x in zip(
+                            *sorted(
+                                zip(timestampsAll[i], prices_minAll[i]),
+                                key=lambda pair: pair[0],
+                            )
                         )
-                    )
-                ]
+                    ]
 
-                plt.plot(x, y, ".-", label=names[i], color=colors[i])
+                    plt.plot(x, y, ".-", label=names[i], color=colors[i])
+
             # Pass if prices_minAll = []
             except:
                 pass
@@ -449,8 +450,8 @@ class FetchPrice(commands.Cog):
         plt.title(f"Historical Minimum Sell Order Prices for {itemName} ({item})")
         plt.xlabel("Dates")
         plt.ylabel("Silvers")
-        plt.legend()
-        fig.savefig("plot.png")
+        plt.legend(bbox_to_anchor=(1.02, 1), loc="upper left")
+        plt.savefig("plot.png", bbox_inches="tight")
 
         return
 

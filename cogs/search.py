@@ -4,6 +4,7 @@ import urllib.request
 import json
 import datetime as DT
 import configparser
+import os
 
 
 class Search(commands.Cog):
@@ -23,8 +24,9 @@ class Search(commands.Cog):
         self.client = client
 
         # Load config.ini and get configs
+        currentPath = os.path.dirname(os.path.realpath(__file__))
         configs = configparser.ConfigParser()
-        configs.read("./config.ini")
+        configs.read(os.path.dirname(currentPath) + "/config.ini")
 
         debugChannel = int(configs["Channels"]["debugChannelID"])
         workChannel = [
@@ -54,7 +56,7 @@ class Search(commands.Cog):
         # API can provide recipe
         self.itemURL = "https://gameinfo.albiononline.com/api/gameinfo/items/"  # + item name + /data
 
-    @commands.command(aliases=["Search"])
+    @commands.command()
     async def search(self, ctx, option, *, name):
         """Search and retrieve details for players and guilds."""
 
