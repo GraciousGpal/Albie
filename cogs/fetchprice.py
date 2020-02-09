@@ -114,7 +114,7 @@ class FetchPrice(commands.Cog):
                 # Convert timestamp to datetime format
                 # And find how long ago is timestamp in seconds
                 timestamp = DT.datetime.strptime(
-                    indivData["sell_price_min_date"], "%Y-%m-%dT%H:%M:%S"
+                    indivData["sellPriceMinDate"], "%Y-%m-%dT%H:%M:%S"
                 )
                 tdelta = DT.datetime.utcnow() - timestamp
                 tdelta = DT.timedelta.total_seconds(tdelta)
@@ -149,7 +149,7 @@ class FetchPrice(commands.Cog):
                 locationStringAll.append(locationString)
 
                 # Getting the minimum sell order prices
-                sellPriceMinStringAll.append(indivData["sell_price_min"])
+                sellPriceMinStringAll.append(indivData["sellPriceMin"])
 
             # Express in embed format
             # Basically just output list as column
