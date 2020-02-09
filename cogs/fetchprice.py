@@ -1,14 +1,15 @@
-import discord
-from discord.ext import commands
-import urllib.request
-import json
-import datetime as DT
-import statistics
-import difflib
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import configparser
+import datetime as DT
+import difflib
+import json
 import os
+import statistics
+import urllib.request
+
+import discord
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+from discord.ext import commands
 
 
 class FetchPrice(commands.Cog):
@@ -51,17 +52,17 @@ class FetchPrice(commands.Cog):
 
         # API URLs
         self.apiURL = "https://www.albion-online-data.com/api/v2/stats/prices/"
-        self.locationURL = "?locations=Caerleon,Lymhurst,Martlock,Bridgewatch,FortSterling,Thetford,ArthursRest,MerlynsRest,MorganasRest,BlackMarket"
+        self.locationURL = "?locations=Caerleon,Lymhurst,Martlock,Bridgewatch,FortSterling,Thetford"
         self.iconURL = "https://gameinfo.albiononline.com/api/gameinfo/items/"
         self.historyURL = "https://www.albion-online-data.com/api/v1/stats/charts/"
-        self.historyLocationURL = "&locations=Thetford,Martlock,Caerleon,Lymhurst,Bridgewatch,FortSterling,ArthursRest,MerlynsRest,MorganasRest,BlackMarket"
+        self.historyLocationURL = "&locations=Thetford,Martlock,Caerleon,Lymhurst,Bridgewatch,FortSterling"
 
         # Bot will search items through this list
         # There are also different localization names
         self.itemList = os.path.dirname(currentPath) + "/item_data.json"
 
     @commands.command(
-        aliases=["price", "quick",]
+        aliases=["price", "quick", ]
     )
     async def prices(self, ctx, *, item):
         """Fetch current prices from Data Project API.
@@ -132,7 +133,7 @@ class FetchPrice(commands.Cog):
 
                 # Put quality beside location
                 try:
-                    if indivData["qualityLevel"] == 0 or indivData["quality"] == 1:
+                    if indivData["qualityLevel"] == 0 or indivData["qualityLevel"] == 1:
                         locationString = indivData["city"]
                     elif indivData["qualityLevel"] == 2:
                         locationString = indivData["city"] + " (Good)"
@@ -344,34 +345,34 @@ class FetchPrice(commands.Cog):
         else:
             for price in prices:
                 if price["location"] == "Arthurs Rest":
-                    prices_minAll[0].extend(price["data"]["prices_min"])
+                    prices_minAll[0].extend(price["data"]["pricesMin"])
                     timestampsAll[0].extend(price["data"]["timestamps"])
                 elif price["location"] == "Black Market":
-                    prices_minAll[1].extend(price["data"]["prices_min"])
+                    prices_minAll[1].extend(price["data"]["pricesMin"])
                     timestampsAll[1].extend(price["data"]["timestamps"])
                 elif price["location"] == "Bridgewatch":
-                    prices_minAll[2].extend(price["data"]["prices_min"])
+                    prices_minAll[2].extend(price["data"]["pricesMin"])
                     timestampsAll[2].extend(price["data"]["timestamps"])
                 elif price["location"] == "Caerleon":
-                    prices_minAll[3].extend(price["data"]["prices_min"])
+                    prices_minAll[3].extend(price["data"]["pricesMin"])
                     timestampsAll[3].extend(price["data"]["timestamps"])
                 elif price["location"] == "Fort Sterling":
-                    prices_minAll[4].extend(price["data"]["prices_min"])
+                    prices_minAll[4].extend(price["data"]["pricesMin"])
                     timestampsAll[4].extend(price["data"]["timestamps"])
                 elif price["location"] == "Lymhurst":
-                    prices_minAll[5].extend(price["data"]["prices_min"])
+                    prices_minAll[5].extend(price["data"]["pricesMin"])
                     timestampsAll[5].extend(price["data"]["timestamps"])
                 elif price["location"] == "Martlock":
-                    prices_minAll[6].extend(price["data"]["prices_min"])
+                    prices_minAll[6].extend(price["data"]["pricesMin"])
                     timestampsAll[6].extend(price["data"]["timestamps"])
                 elif price["location"] == "Merlyns Rest":
-                    prices_minAll[7].extend(price["data"]["prices_min"])
+                    prices_minAll[7].extend(price["data"]["pricesMin"])
                     timestampsAll[7].extend(price["data"]["timestamps"])
                 elif price["location"] == "Morganas Rest":
-                    prices_minAll[8].extend(price["data"]["prices_min"])
+                    prices_minAll[8].extend(price["data"]["pricesMin"])
                     timestampsAll[8].extend(price["data"]["timestamps"])
                 elif price["location"] == "Thetford":
-                    prices_minAll[9].extend(price["data"]["prices_min"])
+                    prices_minAll[9].extend(price["data"]["pricesMin"])
                     timestampsAll[9].extend(price["data"]["timestamps"])
 
         # Convert timestamps from epochs to datetime format
