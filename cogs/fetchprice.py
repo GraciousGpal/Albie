@@ -132,15 +132,15 @@ class FetchPrice(commands.Cog):
 
                 # Put quality beside location
                 try:
-                    if indivData["quality"] == 0 or indivData["quality"] == 1:
+                    if indivData["qualityLevel"] == 0 or indivData["quality"] == 1:
                         locationString = indivData["city"]
-                    elif indivData["quality"] == 2:
+                    elif indivData["qualityLevel"] == 2:
                         locationString = indivData["city"] + " (Good)"
-                    elif indivData["quality"] == 3:
+                    elif indivData["qualityLevel"] == 3:
                         locationString = indivData["city"] + " (Oustanding)"
-                    elif indivData["quality"] == 4:
+                    elif indivData["qualityLevel"] == 4:
                         locationString = indivData["city"] + " (Excellent)"
-                    elif indivData["quality"] == 5:
+                    elif indivData["qualityLevel"] == 5:
                         locationString = indivData["city"] + " (Masterpiece)"
                 # Quality not given for items without quality
                 except:
