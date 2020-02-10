@@ -54,7 +54,7 @@ class Utils(commands.Cog):
 
         self.adminUsers = configs["General"]["adminUsers"].replace("'", "").split(", ")
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def ping(self, ctx):
         """Returns latency of bot."""
 
@@ -73,7 +73,7 @@ class Utils(commands.Cog):
 
         await ctx.send(f"Pong! {round(self.client.latency * 1000)}ms")
 
-    @commands.command(aliases=["python"])
+    @commands.command(aliases=["python"], hidden=True)
     async def exec(self, ctx, *, codes):
         """Execute Python codes with exec function
 
@@ -115,7 +115,7 @@ class Utils(commands.Cog):
         except Exception as e:
             await ctx.send(e)
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def eval(self, ctx, *, codes):
         """Evalute Python variables with eval function.
 

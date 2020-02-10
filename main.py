@@ -43,12 +43,13 @@ async def on_ready():
     """
 
     # Remove default help command (before loading of cogs)
-    client.remove_command("help")
+    #client.remove_command("help")
 
     # Load cogs in folder /cogs
     try:
         for filename in os.listdir(currentPath + "/cogs"):
             if filename.endswith(".py"):
+                print(f"Loading...{filename[:-3]}")
                 client.load_extension(f"cogs.{filename[:-3]}")
     except Exception as e:
         print(e)
@@ -69,7 +70,7 @@ async def on_ready():
 
 
 @client.command()
-async def extension(ctx, option, extension):
+async def extension(ctx, option, extension, hidden=True):
     """Reload, load, or unload extensions.
 
     - Usage: <command-prefix> extension <option> <cog's name>
