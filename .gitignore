@@ -5,7 +5,6 @@ env
 *.pyc
 keys.json
 decom
-data
 test*
 data.zip
 venv
