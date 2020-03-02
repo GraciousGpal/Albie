@@ -5,3 +5,4 @@ jellyfish
 requests
 pandas
 seaborn
+Pillow
