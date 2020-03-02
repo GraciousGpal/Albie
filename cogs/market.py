@@ -33,10 +33,7 @@ class Market(commands.Cog):
     async def prices(self, ctx, *, item):
         total_imgs = []
         item = self.search(item)
-        if len(item) == 1:
-            item_name = item[0]['UniqueName']
-        else:
-            item_name = item[0][1]['UniqueName']
+        item_name = item[0][1]['UniqueName']
 
         full_hisurl = self.base_url + item_name + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
             ["," + "".join(x) for x in self.locations if
@@ -170,15 +167,16 @@ class Market(commands.Cog):
         plotFile = discord.File(buf_3, filename="plot.png")
         buf_3.close()
 
+        embed = discord.Embed(title=f"Item Data for {item[0][1]['LocalizedNames']['EN-US']}")
         # Finally send the embed
-        msg = await ctx.send(file=plotFile)
+        msg = await ctx.send(embed=embed, file=plotFile)
 
     def sort_sim(self, val):
         return val[0]
 
     def search(self, name):
         if name in self.id_list:
-            return [(item) for item in self.dict if item['UniqueName'] == name]
+            return [(11, item) for item in self.dict if item['UniqueName'] == name]
         else:
             r = [(j.jaro_winkler(item['LocalizedNames']["EN-US"].lower(), name.lower()), item) for item in self.dict if
                  item['LocalizedNames'] is not None]
