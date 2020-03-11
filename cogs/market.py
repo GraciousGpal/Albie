@@ -29,13 +29,33 @@ class Market(commands.Cog):
         self.city_colours = {'Thetford': 'purple', 'Martlock': 'skyblue', 'Caerleon': 'red', 'Lymhurst': 'green',
                              'Bridgewatch': 'orange', 'Fort Sterling': 'grey', 'Black Market': 'white'}
 
+        self.tiers = ["Beginner's", "Novice's", "Journeyman's", "Adept's", "Expert's", "Master's", "Grandmaster's",
+                      "Elder's"]
+
     @commands.command(aliases=["price", "p"])
     async def prices(self, ctx, *, item):
         total_imgs = []
+
+        # Search Processing
+
+        # Set Enchant Lvl
+        enchant_lvl = ""
+        for lvl in ["@1", "@2", "@3"]:
+            if lvl in item:
+                print(lvl, item)
+                item = item.replace(lvl, "")
+                enchant_lvl = lvl
+
+        # detect shortened tier
+        tier = self.get_tier(item)
+        if tier is not None:
+            item = item.replace(tier[1], self.tiers[tier[0]])
+
         item = self.search(item)
+
         item_name = item[0][1]['UniqueName']
 
-        full_hisurl = self.base_url + item_name + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
+        full_hisurl = self.base_url + item_name + enchant_lvl + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
             ["," + "".join(x) for x in self.locations if
              x != self.locations[0]]) + f"&time-scale={self.scale}"
         print(full_hisurl)
@@ -167,7 +187,14 @@ class Market(commands.Cog):
         plotFile = discord.File(buf_3, filename="plot.png")
         buf_3.close()
 
-        embed = discord.Embed(title=f"Item Data for {item[0][1]['LocalizedNames']['EN-US']}")
+        enchant_lvl_disp = ""
+        if enchant_lvl != "":
+            enchant_lvl_disp = enchant_lvl.replace("@", "")
+            enchant_lvl_disp = f"Enchantment: {enchant_lvl_disp}"
+
+        embed = discord.Embed(
+            title=f"Item Data for {item[0][1]['LocalizedNames']['EN-US']} {enchant_lvl_disp}", file=plotFile)
+        embed.set_footer(text=f"(ITEM ID: {item[0][1]['UniqueName']})")
         # Finally send the embed
         msg = await ctx.send(embed=embed, file=plotFile)
 
@@ -175,6 +202,11 @@ class Market(commands.Cog):
         return val[0]
 
     def search(self, name):
+        """
+        Uses Jaro Winkler method to find the closest match for the input to a list of items.
+        :param name:
+        :return:
+        """
         if name in self.id_list:
             return [(11, item) for item in self.dict if item['UniqueName'] == name]
         else:
@@ -184,8 +216,29 @@ class Market(commands.Cog):
         return r[0:5]
 
     def get_data(self, url):
+        """
+        Gets the data from the url and converts to Json
+        :param url:
+        :return:
+        """
         data = r.get(url).json()
         return data
+
+    def get_tier(self, string):
+        """
+        Checks for tier info in string and returns tier-1 as an int and tier string
+        in a tuple
+        :param string:
+        :return:
+        """
+        lower_case = ["t" + str(no) for no in range(1, 9)]
+        upper_case = ["T" + str(no) for no in range(1, 9)]
+        for lower, upper in zip(lower_case, upper_case):
+            if upper in string:
+                return upper_case.index(upper), upper
+            elif lower in string:
+                return lower_case.index(lower), lower
+        return None
 
 
 def setup(client):
