@@ -129,7 +129,7 @@ class Market(commands.Cog):
 
         # Get Current Prices -----------------
 
-        currurl = self.base_url_current + item_name + "?locations=" + f"{self.locations[0]}" + "".join(
+        currurl = self.base_url_current + item_name + enchant_lvl + "?locations=" + f"{self.locations[0]}" + "".join(
             ["," + "".join(x) for x in self.locations if x != self.locations[0]])
 
         cdata = self.get_data(currurl)
