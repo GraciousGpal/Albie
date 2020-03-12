@@ -44,7 +44,7 @@ class Market(commands.Cog):
             if lvl in item:
                 print(lvl, item)
                 item = item.replace(lvl, "")
-                enchant_lvl = lvl
+                enchant_lvl = lvl.replace('.', '@')
 
         # detect shortened tier
         tier = self.get_tier(item)
