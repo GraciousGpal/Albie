@@ -40,7 +40,7 @@ class Market(commands.Cog):
 
         # Set Enchant Lvl
         enchant_lvl = ""
-        for lvl in ["@1", "@2", "@3"]:
+        for lvl in [".1", ".2", ".3"]:
             if lvl in item:
                 print(lvl, item)
                 item = item.replace(lvl, "")
