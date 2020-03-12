@@ -42,7 +42,6 @@ class Market(commands.Cog):
         enchant_lvl = ""
         for lvl in [".1", ".2", ".3"]:
             if lvl in item:
-                print(lvl, item)
                 item = item.replace(lvl, "")
                 enchant_lvl = lvl.replace('.', '@')
 
@@ -62,7 +61,7 @@ class Market(commands.Cog):
 
         raw_data = self.get_data(full_hisurl)
 
-        # PreProcess Data
+        # PreProcess Json Data
         data = {}
         # Use the cheapest available quality
         for city_obj in raw_data:
