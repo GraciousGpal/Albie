@@ -52,7 +52,7 @@ class Market(commands.Cog):
             item = item.replace(tier[1], self.tiers[tier[0]])
 
         if item1 in self.id_list:
-            item = [(11, item) for item in self.dict if item['UniqueName'] == item]
+            item = [(11, item) for item in self.dict if item['UniqueName'] == item][0]
         else:
             item = self.search(item)
 
