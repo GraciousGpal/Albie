@@ -35,6 +35,7 @@ class Market(commands.Cog):
     @commands.command(aliases=["price", "p"])
     async def prices(self, ctx, *, item):
         total_imgs = []
+        item1 = item[0:]
 
         # Search Processing
 
@@ -50,7 +51,10 @@ class Market(commands.Cog):
         if tier is not None:
             item = item.replace(tier[1], self.tiers[tier[0]])
 
-        item = self.search(item)
+        if item1 in self.id_list:
+            item = [(11, item) for item in self.dict if item['UniqueName'] == item]
+        else:
+            item = self.search(item)
 
         item_name = item[0][1]['UniqueName']
 
@@ -148,6 +152,7 @@ class Market(commands.Cog):
                 end = datetime.now()
                 elapsed = end - datetime.strptime(city['sell_price_min_date'], "%Y-%m-%dT%H:%M:%S")
                 # print(elapsed)
+
                 # print(type(elapsed))
                 Current_date_data[city['city']][city['quality']] = elapsed.total_seconds()
             else:
