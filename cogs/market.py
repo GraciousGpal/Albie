@@ -295,6 +295,8 @@ class Market(commands.Cog):
             return str(no)
 
     def average(self, lst):
+        if len(lst) == 0:
+            return 0
         return sum(lst) / len(lst)
 
 
