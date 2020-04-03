@@ -86,7 +86,7 @@ class Market(commands.Cog):
             avg_price.append(int(h_data[1][city]['avg_price'].mean()))
             avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
 
-        title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} {enchant_str.replace('@', '')}"
+        title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} E:{enchant_str.replace('@', '')}"
         embed = Embed(title=title)
         embed.set_thumbnail(url=thumb_url)
         avg_p = self.c_game_currency(int(self.average(avg_price)))
