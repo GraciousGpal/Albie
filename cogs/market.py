@@ -91,7 +91,10 @@ class Market(commands.Cog):
         embed.set_thumbnail(url=thumb_url)
         avg_p = self.c_game_currency(int(self.average(avg_price)))
         avg_sv = self.c_game_currency(self.average([x[1] for x in avg_sell_volume]))
-        best_cs = max(avg_sell_volume, key=lambda item: item[1])
+        if len(avg_sell_volume) == 0:
+            best_cs = (None, 0)
+        else:
+            best_cs = max(avg_sell_volume, key=lambda item: item[1])
         best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
         embed.add_field(name="(1W) Avg Price", value=avg_p, inline=True)
         embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
