@@ -6,3 +6,4 @@ requests
 pandas
 seaborn
 Pillow
+tabulate

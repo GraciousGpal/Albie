@@ -11,3 +11,4 @@ venv
 *.db
 *.vscode
 .vscode/settings.json
+decom

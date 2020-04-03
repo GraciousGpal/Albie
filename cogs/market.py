@@ -1,18 +1,17 @@
-from discord.ext import commands
 import io
 import json
-import discord
+from datetime import date
 
-import PIL
 import jellyfish as j
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+import requests
 import requests as r
 import seaborn as sns
-from PIL import Image
-from datetime import datetime
+from discord import Embed
+from discord.ext import commands
 from numpy import nan
+from tabulate import tabulate
 
 
 class Market(commands.Cog):
@@ -31,179 +30,211 @@ class Market(commands.Cog):
 
         self.tiers = ["Beginner's", "Novice's", "Journeyman's", "Adept's", "Expert's", "Master's", "Grandmaster's",
                       "Elder's"]
+        self.quality_tiers = ['Normal', 'Good', 'Outstanding', 'Excellent', 'Masterpiece']
 
     @commands.command(aliases=["price", "p"])
     async def prices(self, ctx, *, item):
-        total_imgs = []
-        item1 = item[0:]
 
-        # Search Processing
+        item_w = item[0:]
+        id_c = False
+        enchant_lvl = None
 
-        # Set Enchant Lvl
-        enchant_lvl = ""
-        for lvl in [".1", ".2", ".3"]:
-            if lvl in item:
-                item = item.replace(lvl, "")
-                enchant_lvl = lvl.replace('.', '@')
+        # Id code detection
+        if item_w in self.id_list:
+            item_f = [(11, item) for item in self.dict if item['UniqueName'] == item_w]
+            id_c = True
 
-        # detect shortened tier
-        tier = self.get_tier(item)
-        if tier is not None:
-            item = item.replace(tier[1], self.tiers[tier[0]])
+        # Search Processing --
+        if not id_c:
+            # Set Enchant Lvl
+            processed_d = self.enchant_processing(item_w)
+            enchant_lvl = processed_d[1]
+            item_w = processed_d[0]
 
-        if item1 in self.id_list:
-            item = [(11, item) for item in self.dict if item['UniqueName'] == item][0]
+            # Tier Processing
+            item_w = self.tier_processing(item_w)
+
+            # Item Search
+            item_f = self.search(item_w)
+
+        item_name = item_f[0][1]['UniqueName']
+
+        # Form url
+        if enchant_lvl is None:
+            enchant_str = ""
+        elif enchant_lvl == 0:
+            enchant_str = ""
         else:
-            item = self.search(item)
+            enchant_str = enchant_lvl
 
-        item_name = item[0][1]['UniqueName']
-
-        full_hisurl = self.base_url + item_name + enchant_lvl + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
+        currurl = self.base_url_current + item_name + enchant_str + "?locations=" + f"{self.locations[0]}" + "".join(
+            ["," + "".join(x) for x in self.locations if x != self.locations[0]])
+        full_hisurl = self.base_url + item_name + enchant_str + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
             ["," + "".join(x) for x in self.locations if
              x != self.locations[0]]) + f"&time-scale={self.scale}"
-        print(full_hisurl)
+        thumb_url = f"https://gameinfo.albiononline.com/api/gameinfo/items/{item_name + enchant_str}.png?count=1"
 
-        raw_data = self.get_data(full_hisurl)
+        current_prices = self.c_price_table(currurl)
+
+        # Historical Data [Plotfile , Data]
+        h_data = self.full_graph(full_hisurl, current_prices)
+
+        # Calculate Avg price
+        avg_price = []
+        avg_sell_volume = []
+        for city in h_data[1]:
+            avg_price.append(int(h_data[1][city]['avg_price'].mean()))
+            avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
+
+        title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} {enchant_str.replace('@', '')}"
+        embed = Embed(title=title)
+        embed.set_thumbnail(url=thumb_url)
+        avg_p = self.c_game_currency(int(self.average(avg_price)))
+        avg_sv = self.c_game_currency(self.average([x[1] for x in avg_sell_volume]))
+        best_cs = max(avg_sell_volume, key=lambda item: item[1])
+        best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
+        embed.add_field(name="(1W) Avg Price", value=avg_p, inline=True)
+        embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
+        embed.add_field(name="Best City Sales", value=best_cs_str, inline=True)
+
+        # Upload to temp.sh and get url
+        today = date.today()
+        filename = f'{item_name}-{today}'
+        h_data[0].seek(0)
+        r = requests.put(f'https://temp.sh/{filename}.png', data=h_data[0])
+        h_data[0].close()
+        x = str(r.content)
+        x = x.replace("b'", "").replace("'", "")
+        print(x)
+        embed.set_image(url=x)
+
+        await ctx.send(embed=embed)
+
+    def c_price_table(self, currurl):
+        '''
+        Generates an ASCII table with current price information
+        :param currurl:
+        :return:
+        '''
+        # Get Data
+        cdata = self.get_data(currurl)
+
+        # Table Creation
+        city_table = {}
+        for city in self.city_colours:
+            city_table[city] = [nan, nan, nan, nan, nan]
+
+        for city in cdata:
+            if city['sell_price_min'] == 0:
+                city['sell_price_min'] = nan
+
+            city_table[city['city']][city['quality'] - 1] = city['sell_price_min']
+
+        # Set up as DataFrame for Processing
+        frame = pd.DataFrame(city_table, index=self.quality_tiers)
+
+        # Remove empty columns and rows
+        frame = frame.dropna(axis=0, how='all')
+        frame = frame.dropna(axis=1, how='all')
+
+        # Remove Nan and convert number into the game format
+        frame2 = frame.apply(self.c_game_series, axis=0)
+        frame2 = frame2.fillna('')
+
+        return tabulate(frame, headers="keys", tablefmt="fancy_grid"), frame, frame2
+
+    def full_graph(self, url, current_price_data):
+        '''
+        Generates an average price history chart and returns history data
+        :param url:
+        :return:
+        '''
+        # Get Data
+        cdata = self.get_data(url)
 
         # PreProcess Json Data
         data = {}
-        # Use the cheapest available quality
-        for city_obj in raw_data:
-            pass
-
-        for city_obj in raw_data:
+        for city_obj in cdata:
             data[city_obj['location']] = pd.DataFrame(city_obj['data'])
 
         for city in data:
             data[city].timestamp = pd.to_datetime(data[city].timestamp)
 
-        if len(raw_data) == 0:
-            await ctx.send('No Price History Information Available')
-        else:
-            # Plotting avg_prices --------------------
-            sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1',
-                        'text.color': '.65', "lines.linewidth": 1})
-
-            fig, ax = plt.subplots()
-            # ax.patch.set_facecolor('black')
-            city_ls = []
+        # Removing Outliers
+        rm_out = True
+        w_data = data.copy()
+        if rm_out:
             for city in data:
-                avg_prices = sns.lineplot(x='timestamp', y='avg_price', color=self.city_colours[city], data=data[city])
-                city_ls.append(city)
+                a = w_data[city]
 
-            locs, labels = plt.xticks()
-            plt.title('Average Item Price')
-            plt.ylabel('')
-            plt.setp(labels, rotation=20)
-            plt.legend(labels=city_ls)
+                # Remove sets with less than 10 data points
+                if a['avg_price'].size < 10:
+                    del w_data[city]
+                else:
+                    # Remove values that do not lie within the 5% and 95% quantile
+                    a = a[a['avg_price'].between(a['avg_price'].quantile(.05), a['avg_price'].quantile(.95))]
 
-            # Store file in memory
-            buf_p1 = io.BytesIO()
-            plt.savefig(buf_p1, format='png')
-
-            # Plotting Items sold
-            sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1',
-                        'text.color': '.65'})
-
-            fig, ax = plt.subplots()
-            for city in data:
-                item_counts = plt.fill_between(data[city]['timestamp'], data[city]['item_count'],
-                                               color=self.city_colours[city],
-                                               alpha=0.3)
-            locs, labels = plt.xticks()
-            plt.title('Volume Sold')
-            plt.ylabel('Items Sold')
-            plt.setp(labels, rotation=20)
-            plt.legend(labels=city_ls)
-            # Store file in memory
-            buf_p2 = io.BytesIO()
-            plt.savefig(buf_p2, format='png')
-
-            # Combine Graphs
-            imgs = []
-            for i in [buf_p1, buf_p2]:
-                i.seek(0)
-                imgs.append(Image.open(i).copy())
-                i.close()
-            # Pick the image which is the smallest, and resize the others to match it (can be arbitrary image shape here)
-            min_shape = sorted([(np.sum(i.size), i.size) for i in imgs], reverse=True)[0][1]
-            imgs_comb = np.hstack((np.asarray(i.resize(min_shape)) for i in imgs))
-            total_imgs.append(PIL.Image.fromarray(imgs_comb))
-
-        # Get Current Prices -----------------
-
-        currurl = self.base_url_current + item_name + enchant_lvl + "?locations=" + f"{self.locations[0]}" + "".join(
-            ["," + "".join(x) for x in self.locations if x != self.locations[0]])
-
-        cdata = self.get_data(currurl)
-        # print(currurl)
-
-        Current_data = {}
-        Current_date_data = {}
-        # PreProcess
-        for city in cdata:
-            # print(Current_data)
-            Current_data[city['city']] = [nan for x in range(5)]
-            Current_date_data[city['city']] = [nan for x in range(5)]
-
-        for city in cdata:
-            if city['quality'] == 0:
-                Current_data[city['city']][city['quality']] = city['sell_price_min']
-                end = datetime.now()
-                elapsed = end - datetime.strptime(city['sell_price_min_date'], "%Y-%m-%dT%H:%M:%S")
-                # print(elapsed)
-
-                # print(type(elapsed))
-                Current_date_data[city['city']][city['quality']] = elapsed.total_seconds()
-            else:
-                Current_data[city['city']][city['quality'] - 1] = city['sell_price_min']
-                end = datetime.now()
-                elapsed = end - datetime.strptime(city['sell_price_min_date'], "%Y-%m-%dT%H:%M:%S")
-                Current_date_data[city['city']][city['quality'] - 1] = elapsed.total_seconds()
-
-        cdf = pd.DataFrame(Current_data, index=['Normal', 'Good', 'Outstanding', 'Excellent', 'Masterpiece'])
-        cdf2 = pd.DataFrame(Current_date_data, index=['Normal', 'Good', 'Outstanding', 'Excellent', 'Masterpiece'])
-        mask = cdf == 0
+        sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1',
+                    'text.color': '.65', "lines.linewidth": 1})
         fig, ax = plt.subplots(1, 2, figsize=(20, 6))
-        a1 = sns.heatmap(cdf, annot=True, fmt='g', ax=ax[0], mask=mask)
-        ax[0].set_title("Current Prices (Silver)")
+        a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), ax=ax[0], fmt='')
         a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
-        a2 = sns.heatmap(cdf2, annot=True, fmt='g', ax=ax[1])
-        ax[1].set_title("Last Updated")
-        a2.set_xticklabels(a2.get_xticklabels(), rotation=30)
+        a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
 
-        # Store file in memory
-        buf_p3 = io.BytesIO()
-        plt.savefig(buf_p3, format='png')
+        # Plotting avg_prices --------------------
+        # ax.patch.set_facecolor('black')
+        city_ls = []
+        for city in w_data:
+            sns.lineplot(x='timestamp', y='avg_price', color=self.city_colours[city], data=w_data[city],
+                         ax=ax[1])
+            city_ls.append(city)
 
-        # Combine Graphs
-        buf_p3.seek(0)
-        total_imgs.append(Image.open(buf_p3).copy())
-        buf_p3.close()
-        min_shape = sorted([(np.sum(i.size), i.size) for i in total_imgs], reverse=True)[0][1]
-        imgs_comb = np.vstack((np.asarray(i.resize(min_shape)) for i in total_imgs))
+        locs, labels = plt.xticks()
+        plt.title('Average Item Price')
+        plt.ylabel('')
+        plt.setp(labels, rotation=20)
+        plt.legend(labels=city_ls)
 
-        # save that beautiful picture
-        imgs_comb = PIL.Image.fromarray(imgs_comb)
-        buf_3 = io.BytesIO()
-        imgs_comb.save(buf_3, format='png')
-        buf_3.seek(0)
-        plotFile = discord.File(buf_3, filename="plot.png")
-        buf_3.close()
+        # Save to Memory
+        buf_p1 = io.BytesIO()
+        plt.savefig(buf_p1, format='png')
+        return buf_p1, w_data
 
-        enchant_lvl_disp = ""
-        if enchant_lvl != "":
-            enchant_lvl_disp = enchant_lvl.replace("@", "")
-            enchant_lvl_disp = f"Enchantment: {enchant_lvl_disp}"
+    def id_detection(self, string):
+        """
+        Detects Item ID codes in input
+        :param string:
+        :return:
+        """
+        if string in self.id_list:
+            item_w = [(11, item) for item in self.dict if item['UniqueName'] == string][0]
+        else:
+            item_w = self.search(string)
+        return item_w
 
-        embed = discord.Embed(
-            title=f"Item Data for {item[0][1]['LocalizedNames']['EN-US']} {enchant_lvl_disp}", file=plotFile)
-        embed.set_footer(text=f"(ITEM ID: {item[0][1]['UniqueName']})")
-        # Finally send the embed
-        msg = await ctx.send(embed=embed, file=plotFile)
+    def enchant_processing(self, item):
+        """
+        Detect if there is enchantment input in string
+        :param item:
+        :return:
+        """
+        enchant_lvl = 0
+        for lvl in [".1", ".2", ".3"]:
+            if lvl in item:
+                item = item.replace(lvl, "")
+                enchant_lvl = lvl.replace('.', '@')
+        return item, enchant_lvl
 
-    def sort_sim(self, val):
-        return val[0]
+    def tier_processing(self, item):
+        """
+        Detect Tier info in string and formats it to the correct search term
+        :param item:
+        :return:
+        """
+        tier = self.get_tier(item)
+        if tier is not None:
+            item = item.replace(tier[1], self.tiers[tier[0]])
+        return item
 
     def search(self, name):
         """
@@ -219,14 +250,8 @@ class Market(commands.Cog):
         r.sort(key=self.sort_sim, reverse=True)
         return r[0:5]
 
-    def get_data(self, url):
-        """
-        Gets the data from the url and converts to Json
-        :param url:
-        :return:
-        """
-        data = r.get(url).json()
-        return data
+    def sort_sim(self, val):
+        return val[0]
 
     def get_tier(self, string):
         """
@@ -244,6 +269,40 @@ class Market(commands.Cog):
                 return lower_case.index(lower), lower
         return None
 
+    def get_data(self, url):
+        """
+        Gets the data from the url and converts to Json
+        :param url:
+        :return:
+        """
+        data = r.get(url).json()
+        return data
+
+    def c_game_series(self, number):
+        return number.apply(self.c_game_currency)
+
+    def c_game_currency(self, no):
+        if type(no) == float or type(no) == int:
+            if no >= 1000000000:
+                return str(round(no / 1000000000, 2)) + "b"
+            elif no >= 1000000:
+                return str(round(no / 1000000, 2)) + "m"
+            elif no >= 1000:
+                return str(round(no / 1000, 2)) + "k"
+            else:
+                return str(no)
+        else:
+            return str(no)
+
+    def average(self, lst):
+        return sum(lst) / len(lst)
+
 
 def setup(client):
     client.add_cog(Market(client))
+
+
+if __name__ == '__main__':
+    m = Market(None)
+    for item in ['t7.1 warbow', 'T5_2H_WARBOW', 'cabbage']:
+        price = m.price(None, item)
