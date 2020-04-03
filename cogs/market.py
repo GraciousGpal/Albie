@@ -98,7 +98,7 @@ class Market(commands.Cog):
             best_cs = max(avg_sell_volume, key=lambda item: item[1])
         best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
         embed.add_field(name="(1W) Avg Price", value=avg_p, inline=True)
-        embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
+        embed.add_field(name="Avg Sell Volume", value=int(avg_sv), inline=True)
         embed.add_field(name="Best City Sales", value=best_cs_str, inline=True)
 
         # Upload to temp.sh and get url
