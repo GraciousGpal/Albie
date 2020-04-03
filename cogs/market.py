@@ -91,6 +91,7 @@ class Market(commands.Cog):
         embed.set_thumbnail(url=thumb_url)
         avg_p = self.c_game_currency(int(self.average(avg_price)))
         avg_sv = self.c_game_currency(self.average([x[1] for x in avg_sell_volume]))
+
         if len(avg_sell_volume) == 0:
             best_cs = (None, 0)
         else:
@@ -108,7 +109,6 @@ class Market(commands.Cog):
         h_data[0].close()
         x = str(r.content)
         x = x.replace("b'", "").replace("'", "")
-        print(x)
         embed.set_image(url=x)
 
         await ctx.send(embed=embed)
@@ -179,24 +179,34 @@ class Market(commands.Cog):
 
         sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1',
                     'text.color': '.65', "lines.linewidth": 1})
-        fig, ax = plt.subplots(1, 2, figsize=(20, 6))
-        a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), ax=ax[0], fmt='')
-        a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
-        a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
+
+        if len(w_data) != 0:
+            no_plots = 2
+            fig, ax = plt.subplots(1, no_plots, figsize=(20, 6))
+            a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), ax=ax[0], fmt='')
+            a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
+            a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
+        else:
+            no_plots = 0
+            fig, ax = plt.subplots(1, figsize=(20, 6))
+            a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), fmt='')
+            a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
+            a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
 
         # Plotting avg_prices --------------------
         # ax.patch.set_facecolor('black')
         city_ls = []
-        for city in w_data:
-            sns.lineplot(x='timestamp', y='avg_price', color=self.city_colours[city], data=w_data[city],
-                         ax=ax[1])
-            city_ls.append(city)
+        if len(w_data) != 0:
+            for city in w_data:
+                sns.lineplot(x='timestamp', y='avg_price', color=self.city_colours[city], data=w_data[city],
+                             ax=ax[1])
+                city_ls.append(city)
 
-        locs, labels = plt.xticks()
-        plt.title('Average Item Price')
-        plt.ylabel('')
-        plt.setp(labels, rotation=20)
-        plt.legend(labels=city_ls)
+            locs, labels = plt.xticks()
+            plt.title('Average Item Price')
+            plt.ylabel('')
+            plt.setp(labels, rotation=20)
+            plt.legend(labels=city_ls)
 
         # Save to Memory
         buf_p1 = io.BytesIO()
