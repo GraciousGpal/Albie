@@ -81,25 +81,33 @@ class Market(commands.Cog):
 
         # Calculate Avg price
         avg_price = []
+        avg_current_price = []
         avg_sell_volume = []
         for city in h_data[1]:
             avg_price.append(int(h_data[1][city]['avg_price'].mean()))
             avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
 
-        title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} E:{enchant_str.replace('@', '')}"
-        embed = Embed(title=title)
-        embed.set_thumbnail(url=thumb_url)
+        for city in current_prices[1]:
+            a = current_prices[1]
+            avg_current_price.append(a[city].mean())
+
         avg_p = self.c_game_currency(int(self.average(avg_price)))
+        avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
         avg_sv = self.c_game_currency(int(self.average([x[1] for x in avg_sell_volume])))
 
         if len(avg_sell_volume) == 0:
             best_cs = (None, 0)
         else:
             best_cs = max(avg_sell_volume, key=lambda item: item[1])
+
+        title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant_str.replace('@', '')})"
+        embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name + enchant_str}")
+        embed.set_thumbnail(url=thumb_url)
         best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
-        embed.add_field(name="(1W) Avg Price", value=avg_p, inline=True)
+        embed.add_field(name="Avg Current Price", value=avg_cp, inline=True)
+        embed.add_field(name="Avg Historical Price", value=avg_p, inline=True)
         embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
-        embed.add_field(name="Best City Sales", value=best_cs_str, inline=True)
+        embed.set_footer(text=f"Best City Sales : {best_cs_str}")
 
         # Upload to temp.sh and get url
         today = date.today()
@@ -183,13 +191,14 @@ class Market(commands.Cog):
         if len(w_data) != 0:
             no_plots = 2
             fig, ax = plt.subplots(1, no_plots, figsize=(20, 6))
-            a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), ax=ax[0], fmt='')
+            a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), ax=ax[0], fmt='',
+                             cbar=False)
             a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
             a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
         else:
             no_plots = 0
             fig, ax = plt.subplots(1, figsize=(20, 6))
-            a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), fmt='')
+            a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), fmt='', cbar=False)
             a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
             a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
 
