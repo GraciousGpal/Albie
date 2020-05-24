@@ -7,7 +7,8 @@ The Discord bot fetches the latest minimum sell order prices (same as AlbionOnli
 
 ## How do I get the Assistant?
 
-Unfortunately I am unable to host the bot right now. So you would have to **host it yourself**.
+Click the following link to add the bot to your server:
+[Albie Invite Link](https://discordapp.com/oauth2/authorize?client_id=672946568453685248&scope=bot&permissions=130048)
 
 ### Getting Started
 
