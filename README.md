@@ -50,7 +50,7 @@ Your server name
 1. Inside **config.ini** you can change or append:
 ```ini
 adminUsers = 'username1#1234', 'username2#1234'
-commandPrefix = 'emilie ', 'Emilie '
+commandPrefix = '- ', '!'
 ```
   + commandPrefix is how the bot should be called.
   + Being an admin user allows you to load/unload/reload cogs, and access **utils.py** commands.
