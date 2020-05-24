@@ -5,7 +5,6 @@ import keep_alive
 import logging
 import configparser
 
-
 # Load config.ini
 currentPath = os.path.dirname(os.path.realpath(__file__))
 configs = configparser.ConfigParser()
@@ -107,5 +106,5 @@ async def extension(ctx, option, extension, hidden=True):
 
 
 # Copy from your Discord developer portal
-token = configs["TOKEN"]["botToken"]
+token = os.environ['DISCORDAPI']
 client.run(token)
