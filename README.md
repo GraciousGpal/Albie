@@ -1,12 +1,5 @@
 # Albion Online Discord Assistant Bot
 
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
-## Meet The Assistant
-
-![](Images/eg_price.png)
-
 Thanks to the [Albion Online Data Project](https://www.albion-online-data.com/), and the many players that download and run the Data Project [client](https://github.com/BroderickHyman/albiondata-client/releases) while playing the game, market price data are collected and shared freely with all Albion players. Perhaps the most popular tool that utilized these data is [AlbionOnline2D](https://www.albiononline2d.com/en/item).
 
 The Discord bot fetches the latest minimum sell order prices (same as AlbionOnline2D), and plots the past 7 days historical prices, for the item that you asked. (Notice the typo 'lether' instead of 'leather'). The assistant will find the closest match to your query and also provides item suggestions in case you forgot how to spell. What a sweet assistant.
@@ -96,73 +89,13 @@ onlyWork = False
 ## Features
 
 ```
-emilie price <item name>
+.price <item name>
 ```
 + Returns latest minimum sell order prices as Discord embed, and plots 7 days historical prices. (First screenshot)
 ```
-emilie quick <item name>
-```
-+ Same as previous command, but no plotting of 7 days historical prices (faster).
-```
-emilie search <option> <player/guild name>
+.search <option> <player/guild name>
 ```
 + `<option>` can be `player` or `guild`.
 + Search and returns details about a player/guild.
-+ [Screenshot: Searching for player](Images/eg_player.png)
-+ [Screenshot: Searching for guild](Images/eg_guild.png)
-
-Admin commands:
-```
-emilie extension <option> <cogs filenames>
-```
-+ `<option>` can be `load`, `unload`, `reload`.
-+ Load/Unload/Reload cogs in the cogs folder, e.g. if you want to remove or add certain features.
-```
-emilie ping
-```
-+ Bot will return the latency.
-```
-emilie eval <python variables/generators>
-```
-+ eval is simply the Python function [eval](https://docs.python.org/3.5/library/functions.html#eval).
-+ Allows you to check stuffs that the bot knows, i.e. list of members, servers the bot is in etc.
-+ [Screenshot: Listing all users with the role 'Member'](Images/eg_member.png)
-```
-emilie exec <python codes>
-```
-+ exec is the Python function [exec](https://docs.python.org/3.5/library/functions.html#exec).
-+ This is a powerful command and care must be taken when using it.
-+ This command allows you to run any Python code, thus it can be abused to spam or perform tasks that breaks the bot.
-+ [Screenshot: Finding the first 300 primes](Images/eg_primes.png) (I know this is arbitrary... but just to show you what it can do.)
-
-The eval and the exec commands are there because I got tired of adding features to the bot.
-
-I don't have to implement anything if I can simply run arbitrary codes.
-
-*- Famous last words before breaking everything*
-
-## Future Works
-
-+ Allow different localizations for item search.
-  + This is possible but not implemented yet.
-  + Items are searched via the `item_data.json` file, which already have different localizations.
-+ Item data search to show recipes etc.
-  + This is also possible but not implemented yet.
-  + The item API is already included in the the cog **cogs/search.py**, but nothing is done with it yet.
-+ Host a bot myself so people can use the bot without having to host their own.
-
-## Extra Background
-
-This is a stripped-down version of a bot I made for my guild, Pangolin Trading Company. As I haven't been on Albion for quite a while, I am releasing the source codes of the bot so that the community can improve upon or implement their own bots. The stripped functions are those that were specific to the guild. For example:
-
-+ Fetch data from guild's Google Sheets
-+ Edit data in guild's Google Sheets
-+ Send guild's server welcome messages
-+ Send direct messages to guild members
-
-The cogs of these features are in the '**Unused cogs**' folder, so you can refer to them if you want to implement these features yourself.
-
-## License
-See the [LICENSE](LICENSE) file for license rights and limitations.
 
 "# Albie" 
