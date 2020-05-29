@@ -87,7 +87,7 @@ class Market(commands.Cog):
             avg_price.append(int(h_data[1][city]['avg_price'].mean()))
             avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
 
-        avg_current_price = current_prices[1].mean()
+        avg_current_price = current_prices[1].loc['Normal', :]
 
         avg_p = self.c_game_currency(int(self.average(avg_price)))
         avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
