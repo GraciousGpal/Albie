@@ -8,7 +8,7 @@ import pandas as pd
 import requests
 import requests as r
 import seaborn as sns
-from discord import Embed
+from discord import Embed, File
 from discord.ext import commands
 from numpy import nan
 from tabulate import tabulate
@@ -102,22 +102,19 @@ class Market(commands.Cog):
         embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name + enchant_str}")
         embed.set_thumbnail(url=thumb_url)
         best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
-        embed.add_field(name="Avg Current Price", value=avg_cp, inline=True)
-        embed.add_field(name="Avg Historical Price", value=avg_p, inline=True)
+        embed.add_field(name="Avg Current Price (Normal)", value=avg_cp, inline=True)
+        embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
         embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
         embed.set_footer(text=f"Best City Sales : {best_cs_str}")
 
-        # Upload to temp.sh and get url
+        # Upload to discord
         today = date.today()
         filename = f'{item_name}-{today}'
         h_data[0].seek(0)
-        r = requests.put(f'https://temp.sh/{filename}.png', data=h_data[0])
+        file = File(h_data[0], filename=f"{filename}.png")
         h_data[0].close()
-        x = str(r.content)
-        x = x.replace("b'", "").replace("'", "")
-        embed.set_image(url=x)
-
-        await ctx.send(embed=embed)
+        embed.set_image(url=f"attachment://{filename}.png")
+        await ctx.send(file=file, embed=embed)
 
     def c_price_table(self, currurl):
         '''
@@ -265,7 +262,8 @@ class Market(commands.Cog):
         if name in self.id_list:
             return [(11, item) for item in self.dict if item['UniqueName'] == name]
         else:
-            r = [(j.jaro_winkler(item['LocalizedNames']["EN-US"].lower(), name.lower()), item) for item in self.dict if
+            r = [(j.jaro_winkler_similarity(item['LocalizedNames']["EN-US"].lower(), name.lower()), item) for item in
+                 self.dict if
                  item['LocalizedNames'] is not None]
         r.sort(key=self.sort_sim, reverse=True)
         return r[0:5]
