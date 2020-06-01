@@ -1,9 +1,9 @@
+Flask
 discord.py
-flask
+jellyfish == 0.7.2
 matplotlib
-jellyfish
-requests
+numpy
 pandas
+requests
 seaborn
-Pillow
 tabulate
