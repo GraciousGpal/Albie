@@ -263,7 +263,7 @@ class Market(commands.Cog):
 		if name in self.id_list:
 			return [(11, item) for item in self.dict if item['UniqueName'] == name]
 		else:
-			r = [(j.jaro_winkler_similarity(item['LocalizedNames']["EN-US"].lower(), name.lower()), item) for item in
+			r = [(j.jaro_winkler(item['LocalizedNames']["EN-US"].lower(), name.lower()), item) for item in
 				 self.dict if
 				 item['LocalizedNames'] is not None]
 		r.sort(key=self.sort_sim, reverse=True)
