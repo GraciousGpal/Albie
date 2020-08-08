@@ -1,9 +1,9 @@
 discord.py==1.4.0
 flask
 matplotlib
-jellyfish
-requests
+numpy
 pandas
+requests
 seaborn
-Pillow
 tabulate
+jellyfish
