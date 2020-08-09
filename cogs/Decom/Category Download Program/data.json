@@ -1,0 +1,1028 @@
+{
+  "categoriesTree": [
+    {
+      "text": "Accessories",
+      "id": "accessories",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "bag",
+          "text": "Bag",
+          "href": "/en/item/cat/accessories/subcat/bag",
+          "selectable": false
+        },
+        {
+          "id": "cape",
+          "text": "Cape",
+          "href": "/en/item/cat/accessories/subcat/cape",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/accessories"
+    },
+    {
+      "text": "Armor",
+      "id": "armor",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "cloth_armor",
+          "text": "Cloth Armor",
+          "href": "/en/item/cat/armor/subcat/cloth_armor",
+          "selectable": false
+        },
+        {
+          "id": "cloth_helmet",
+          "text": "Cloth Helmet",
+          "href": "/en/item/cat/armor/subcat/cloth_helmet",
+          "selectable": false
+        },
+        {
+          "id": "cloth_shoes",
+          "text": "Cloth Shoes",
+          "href": "/en/item/cat/armor/subcat/cloth_shoes",
+          "selectable": false
+        },
+        {
+          "id": "leather_armor",
+          "text": "Leather Armor",
+          "href": "/en/item/cat/armor/subcat/leather_armor",
+          "selectable": false
+        },
+        {
+          "id": "leather_helmet",
+          "text": "Leather Helmet",
+          "href": "/en/item/cat/armor/subcat/leather_helmet",
+          "selectable": false
+        },
+        {
+          "id": "leather_shoes",
+          "text": "Leather Shoes",
+          "href": "/en/item/cat/armor/subcat/leather_shoes",
+          "selectable": false
+        },
+        {
+          "id": "plate_armor",
+          "text": "Plate Armor",
+          "href": "/en/item/cat/armor/subcat/plate_armor",
+          "selectable": false
+        },
+        {
+          "id": "plate_helmet",
+          "text": "Plate Helmet",
+          "href": "/en/item/cat/armor/subcat/plate_helmet",
+          "selectable": false
+        },
+        {
+          "id": "plate_shoes",
+          "text": "Plate Shoes",
+          "href": "/en/item/cat/armor/subcat/plate_shoes",
+          "selectable": false
+        },
+        {
+          "id": "unique_armor",
+          "text": "Unique Armor",
+          "href": "/en/item/cat/armor/subcat/unique_armor",
+          "selectable": false
+        },
+        {
+          "id": "unique_helmet",
+          "text": "Unique Helmet",
+          "href": "/en/item/cat/armor/subcat/unique_helmet",
+          "selectable": false
+        },
+        {
+          "id": "unique_shoes",
+          "text": "Unique Shoes",
+          "href": "/en/item/cat/armor/subcat/unique_shoes",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/armor"
+    },
+    {
+      "text": "Artifact",
+      "id": "artefacts",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "armor_artefact",
+          "text": "Armor",
+          "href": "/en/item/cat/artefacts/subcat/armor_artefact",
+          "selectable": false
+        },
+        {
+          "id": "magic_artefact",
+          "text": "Magic",
+          "href": "/en/item/cat/artefacts/subcat/magic_artefact",
+          "selectable": false
+        },
+        {
+          "id": "melee_artefact",
+          "text": "Melee",
+          "href": "/en/item/cat/artefacts/subcat/melee_artefact",
+          "selectable": false
+        },
+        {
+          "id": "offhand_artefact",
+          "text": "Offhand",
+          "href": "/en/item/cat/artefacts/subcat/offhand_artefact",
+          "selectable": false
+        },
+        {
+          "id": "ranged_artefact",
+          "text": "Ranged",
+          "href": "/en/item/cat/artefacts/subcat/ranged_artefact",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/artefacts"
+    },
+    {
+      "text": "City Resources",
+      "id": "cityresources",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "beastheart",
+          "text": "Beastheart",
+          "href": "/en/item/cat/cityresources/subcat/beastheart",
+          "selectable": false
+        },
+        {
+          "id": "mountainheart",
+          "text": "Mountainheart",
+          "href": "/en/item/cat/cityresources/subcat/mountainheart",
+          "selectable": false
+        },
+        {
+          "id": "rockheart",
+          "text": "Rockheart",
+          "href": "/en/item/cat/cityresources/subcat/rockheart",
+          "selectable": false
+        },
+        {
+          "id": "treeheart",
+          "text": "Treeheart",
+          "href": "/en/item/cat/cityresources/subcat/treeheart",
+          "selectable": false
+        },
+        {
+          "id": "vineheart",
+          "text": "Vineheart",
+          "href": "/en/item/cat/cityresources/subcat/vineheart",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/cityresources"
+    },
+    {
+      "text": "Consumable",
+      "id": "consumables",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "cooked",
+          "text": "Cooked",
+          "href": "/en/item/cat/consumables/subcat/cooked",
+          "selectable": false
+        },
+        {
+          "id": "fish",
+          "text": "Fish",
+          "href": "/en/item/cat/consumables/subcat/fish",
+          "selectable": false
+        },
+        {
+          "id": "fishingbait",
+          "text": "Fishing Bait",
+          "href": "/en/item/cat/consumables/subcat/fishingbait",
+          "selectable": false
+        },
+        {
+          "id": "maps",
+          "text": "Map",
+          "href": "/en/item/cat/consumables/subcat/maps",
+          "selectable": false
+        },
+        {
+          "id": "other",
+          "text": "Other",
+          "href": "/en/item/cat/consumables/subcat/other",
+          "selectable": false
+        },
+        {
+          "id": "potion",
+          "text": "Potion",
+          "href": "/en/item/cat/consumables/subcat/potion",
+          "selectable": false
+        },
+        {
+          "id": "skillbook",
+          "text": "Tome of Insight",
+          "href": "/en/item/cat/consumables/subcat/skillbook",
+          "selectable": false
+        },
+        {
+          "id": "vanity",
+          "text": "Vanity",
+          "href": "/en/item/cat/consumables/subcat/vanity",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/consumables"
+    },
+    {
+      "text": "Farmable",
+      "id": "farmables",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "animals",
+          "text": "Animal",
+          "href": "/en/item/cat/farmables/subcat/animals",
+          "selectable": false
+        },
+        {
+          "id": "seed",
+          "text": "Seed",
+          "href": "/en/item/cat/farmables/subcat/seed",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/farmables"
+    },
+    {
+      "text": "Furniture",
+      "id": "furniture",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "banner",
+          "text": "Banner",
+          "href": "/en/item/cat/furniture/subcat/banner",
+          "selectable": false
+        },
+        {
+          "id": "bed",
+          "text": "Bed",
+          "href": "/en/item/cat/furniture/subcat/bed",
+          "selectable": false
+        },
+        {
+          "id": "chest",
+          "text": "Chest",
+          "href": "/en/item/cat/furniture/subcat/chest",
+          "selectable": false
+        },
+        {
+          "id": "decoration_furniture",
+          "text": "Decoration",
+          "href": "/en/item/cat/furniture/subcat/decoration_furniture",
+          "selectable": false
+        },
+        {
+          "id": "flag",
+          "text": "Flag",
+          "href": "/en/item/cat/furniture/subcat/flag",
+          "selectable": false
+        },
+        {
+          "id": "heretic_furniture",
+          "text": "Heretic",
+          "href": "/en/item/cat/furniture/subcat/heretic_furniture",
+          "selectable": false
+        },
+        {
+          "id": "keeper_furniture",
+          "text": "Keeper",
+          "href": "/en/item/cat/furniture/subcat/keeper_furniture",
+          "selectable": false
+        },
+        {
+          "id": "morgana_furniture",
+          "text": "Morgana",
+          "href": "/en/item/cat/furniture/subcat/morgana_furniture",
+          "selectable": false
+        },
+        {
+          "id": "repairkit",
+          "text": "Repair Kit",
+          "href": "/en/item/cat/furniture/subcat/repairkit",
+          "selectable": false
+        },
+        {
+          "id": "table",
+          "text": "Table",
+          "href": "/en/item/cat/furniture/subcat/table",
+          "selectable": false
+        },
+        {
+          "id": "unique",
+          "text": "Unique",
+          "href": "/en/item/cat/furniture/subcat/unique",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/furniture"
+    },
+    {
+      "text": "Gathering Gear",
+      "id": "gatherergear",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "fibergatherer_armor",
+          "text": "Harvester Garb",
+          "href": "/en/item/cat/gatherergear/subcat/fibergatherer_armor",
+          "selectable": false
+        },
+        {
+          "id": "fibergatherer_backpack",
+          "text": "Harvester Backpack",
+          "href": "/en/item/cat/gatherergear/subcat/fibergatherer_backpack",
+          "selectable": false
+        },
+        {
+          "id": "fibergatherer_helmet",
+          "text": "Harvester Cap",
+          "href": "/en/item/cat/gatherergear/subcat/fibergatherer_helmet",
+          "selectable": false
+        },
+        {
+          "id": "fibergatherer_shoes",
+          "text": "Harvester Workboots",
+          "href": "/en/item/cat/gatherergear/subcat/fibergatherer_shoes",
+          "selectable": false
+        },
+        {
+          "id": "fishgatherer_armor",
+          "text": "Fisherman Garb",
+          "href": "/en/item/cat/gatherergear/subcat/fishgatherer_armor",
+          "selectable": false
+        },
+        {
+          "id": "fishgatherer_backpack",
+          "text": "Fisherman Backpack",
+          "href": "/en/item/cat/gatherergear/subcat/fishgatherer_backpack",
+          "selectable": false
+        },
+        {
+          "id": "fishgatherer_helmet",
+          "text": "Fisherman Cap",
+          "href": "/en/item/cat/gatherergear/subcat/fishgatherer_helmet",
+          "selectable": false
+        },
+        {
+          "id": "fishgatherer_shoes",
+          "text": "Fisherman Boots",
+          "href": "/en/item/cat/gatherergear/subcat/fishgatherer_shoes",
+          "selectable": false
+        },
+        {
+          "id": "hidegatherer_armor",
+          "text": "Skinner Garb",
+          "href": "/en/item/cat/gatherergear/subcat/hidegatherer_armor",
+          "selectable": false
+        },
+        {
+          "id": "hidegatherer_backpack",
+          "text": "Skinner Backpack",
+          "href": "/en/item/cat/gatherergear/subcat/hidegatherer_backpack",
+          "selectable": false
+        },
+        {
+          "id": "hidegatherer_helmet",
+          "text": "Skinner Cap",
+          "href": "/en/item/cat/gatherergear/subcat/hidegatherer_helmet",
+          "selectable": false
+        },
+        {
+          "id": "hidegatherer_shoes",
+          "text": "Skinner Workboots",
+          "href": "/en/item/cat/gatherergear/subcat/hidegatherer_shoes",
+          "selectable": false
+        },
+        {
+          "id": "oregatherer_armor",
+          "text": "Miner Garb",
+          "href": "/en/item/cat/gatherergear/subcat/oregatherer_armor",
+          "selectable": false
+        },
+        {
+          "id": "oregatherer_backpack",
+          "text": "Miner Backpack",
+          "href": "/en/item/cat/gatherergear/subcat/oregatherer_backpack",
+          "selectable": false
+        },
+        {
+          "id": "oregatherer_helmet",
+          "text": "Miner Cap",
+          "href": "/en/item/cat/gatherergear/subcat/oregatherer_helmet",
+          "selectable": false
+        },
+        {
+          "id": "oregatherer_shoes",
+          "text": "Miner Workboots",
+          "href": "/en/item/cat/gatherergear/subcat/oregatherer_shoes",
+          "selectable": false
+        },
+        {
+          "id": "rockgatherer_armor",
+          "text": "Quarrier Garb",
+          "href": "/en/item/cat/gatherergear/subcat/rockgatherer_armor",
+          "selectable": false
+        },
+        {
+          "id": "rockgatherer_backpack",
+          "text": "Quarrier Backpack",
+          "href": "/en/item/cat/gatherergear/subcat/rockgatherer_backpack",
+          "selectable": false
+        },
+        {
+          "id": "rockgatherer_helmet",
+          "text": "Quarrier Cap",
+          "href": "/en/item/cat/gatherergear/subcat/rockgatherer_helmet",
+          "selectable": false
+        },
+        {
+          "id": "rockgatherer_shoes",
+          "text": "Quarrier Workboots",
+          "href": "/en/item/cat/gatherergear/subcat/rockgatherer_shoes",
+          "selectable": false
+        },
+        {
+          "id": "woodgatherer_armor",
+          "text": "Lumberjack Garb",
+          "href": "/en/item/cat/gatherergear/subcat/woodgatherer_armor",
+          "selectable": false
+        },
+        {
+          "id": "woodgatherer_backpack",
+          "text": "Lumberjack Backpack",
+          "href": "/en/item/cat/gatherergear/subcat/woodgatherer_backpack",
+          "selectable": false
+        },
+        {
+          "id": "woodgatherer_helmet",
+          "text": "Lumberjack Cap",
+          "href": "/en/item/cat/gatherergear/subcat/woodgatherer_helmet",
+          "selectable": false
+        },
+        {
+          "id": "woodgatherer_shoes",
+          "text": "Lumberjack Workboots",
+          "href": "/en/item/cat/gatherergear/subcat/woodgatherer_shoes",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/gatherergear"
+    },
+    {
+      "text": "Luxury Goods",
+      "id": "luxurygoods",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "bridgewatch",
+          "text": "Bridgewatch",
+          "href": "/en/item/cat/luxurygoods/subcat/bridgewatch",
+          "selectable": false
+        },
+        {
+          "id": "caerleon",
+          "text": "Caerleon",
+          "href": "/en/item/cat/luxurygoods/subcat/caerleon",
+          "selectable": false
+        },
+        {
+          "id": "fortsterling",
+          "text": "Fort Sterling",
+          "href": "/en/item/cat/luxurygoods/subcat/fortsterling",
+          "selectable": false
+        },
+        {
+          "id": "lymhurst",
+          "text": "Lymhurst",
+          "href": "/en/item/cat/luxurygoods/subcat/lymhurst",
+          "selectable": false
+        },
+        {
+          "id": "martlock",
+          "text": "Martlock",
+          "href": "/en/item/cat/luxurygoods/subcat/martlock",
+          "selectable": false
+        },
+        {
+          "id": "thetford",
+          "text": "Thetford",
+          "href": "/en/item/cat/luxurygoods/subcat/thetford",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/luxurygoods"
+    },
+    {
+      "text": "Magic",
+      "id": "magic",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "arcanestaff",
+          "text": "Arcane Staff",
+          "href": "/en/item/cat/magic/subcat/arcanestaff",
+          "selectable": false
+        },
+        {
+          "id": "cursestaff",
+          "text": "Cursed Staff",
+          "href": "/en/item/cat/magic/subcat/cursestaff",
+          "selectable": false
+        },
+        {
+          "id": "firestaff",
+          "text": "Fire Staff",
+          "href": "/en/item/cat/magic/subcat/firestaff",
+          "selectable": false
+        },
+        {
+          "id": "froststaff",
+          "text": "Frost Staff",
+          "href": "/en/item/cat/magic/subcat/froststaff",
+          "selectable": false
+        },
+        {
+          "id": "holystaff",
+          "text": "Holy Staff",
+          "href": "/en/item/cat/magic/subcat/holystaff",
+          "selectable": false
+        },
+        {
+          "id": "naturestaff",
+          "text": "Nature Staff",
+          "href": "/en/item/cat/magic/subcat/naturestaff",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/magic"
+    },
+    {
+      "text": "Materials",
+      "id": "materials",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "essence",
+          "text": "Essence",
+          "href": "/en/item/cat/materials/subcat/essence",
+          "selectable": false
+        },
+        {
+          "id": "other",
+          "text": "Other",
+          "href": "/en/item/cat/materials/subcat/other",
+          "selectable": false
+        },
+        {
+          "id": "relic",
+          "text": "Relic",
+          "href": "/en/item/cat/materials/subcat/relic",
+          "selectable": false
+        },
+        {
+          "id": "rune",
+          "text": "Rune",
+          "href": "/en/item/cat/materials/subcat/rune",
+          "selectable": false
+        },
+        {
+          "id": "soul",
+          "text": "Soul",
+          "href": "/en/item/cat/materials/subcat/soul",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/materials"
+    },
+    {
+      "text": "Melee",
+      "id": "melee",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "axe",
+          "text": "Axe",
+          "href": "/en/item/cat/melee/subcat/axe",
+          "selectable": false
+        },
+        {
+          "id": "dagger",
+          "text": "Dagger",
+          "href": "/en/item/cat/melee/subcat/dagger",
+          "selectable": false
+        },
+        {
+          "id": "hammer",
+          "text": "Hammer",
+          "href": "/en/item/cat/melee/subcat/hammer",
+          "selectable": false
+        },
+        {
+          "id": "mace",
+          "text": "Mace",
+          "href": "/en/item/cat/melee/subcat/mace",
+          "selectable": false
+        },
+        {
+          "id": "quarterstaff",
+          "text": "Quarterstaff",
+          "href": "/en/item/cat/melee/subcat/quarterstaff",
+          "selectable": false
+        },
+        {
+          "id": "spear",
+          "text": "Spear",
+          "href": "/en/item/cat/melee/subcat/spear",
+          "selectable": false
+        },
+        {
+          "id": "sword",
+          "text": "Sword",
+          "href": "/en/item/cat/melee/subcat/sword",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/melee"
+    },
+    {
+      "text": "Mount",
+      "id": "mounts",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "armoredhorse",
+          "text": "Armored Horse",
+          "href": "/en/item/cat/mounts/subcat/armoredhorse",
+          "selectable": false
+        },
+        {
+          "id": "ox",
+          "text": "Ox",
+          "href": "/en/item/cat/mounts/subcat/ox",
+          "selectable": false
+        },
+        {
+          "id": "rare_mount",
+          "text": "Rare Mount",
+          "href": "/en/item/cat/mounts/subcat/rare_mount",
+          "selectable": false
+        },
+        {
+          "id": "ridinghorse",
+          "text": "Riding Horse",
+          "href": "/en/item/cat/mounts/subcat/ridinghorse",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/mounts"
+    },
+    {
+      "text": "Off-Hand",
+      "id": "offhand",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "book",
+          "text": "Book",
+          "href": "/en/item/cat/offhand/subcat/book",
+          "selectable": false
+        },
+        {
+          "id": "horn",
+          "text": "Horn",
+          "href": "/en/item/cat/offhand/subcat/horn",
+          "selectable": false
+        },
+        {
+          "id": "orb",
+          "text": "Orb",
+          "href": "/en/item/cat/offhand/subcat/orb",
+          "selectable": false
+        },
+        {
+          "id": "shield",
+          "text": "Shield",
+          "href": "/en/item/cat/offhand/subcat/shield",
+          "selectable": false
+        },
+        {
+          "id": "torch",
+          "text": "Torch",
+          "href": "/en/item/cat/offhand/subcat/torch",
+          "selectable": false
+        },
+        {
+          "id": "totem",
+          "text": "Totem",
+          "href": "/en/item/cat/offhand/subcat/totem",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/offhand"
+    },
+    {
+      "text": "Other",
+      "id": "other",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "mission",
+          "text": "Mission Item",
+          "href": "/en/item/cat/other/subcat/mission",
+          "selectable": false
+        },
+        {
+          "id": "trash",
+          "text": "Trash",
+          "href": "/en/item/cat/other/subcat/trash",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/other"
+    },
+    {
+      "text": "Product",
+      "id": "products",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "animals",
+          "text": "Animal",
+          "href": "/en/item/cat/products/subcat/animals",
+          "selectable": false
+        },
+        {
+          "id": "cooked",
+          "text": "Cooked",
+          "href": "/en/item/cat/products/subcat/cooked",
+          "selectable": false
+        },
+        {
+          "id": "farming",
+          "text": "Farming",
+          "href": "/en/item/cat/products/subcat/farming",
+          "selectable": false
+        },
+        {
+          "id": "journal",
+          "text": "Journals",
+          "href": "/en/item/cat/products/subcat/journal",
+          "selectable": false
+        }
+      ],
+      "state": {
+        "expanded": true
+      },
+      "href": "/en/item/cat/products"
+    },
+    {
+      "text": "Ranged",
+      "id": "ranged",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "bow",
+          "text": "Bow",
+          "href": "/en/item/cat/ranged/subcat/bow",
+          "selectable": false
+        },
+        {
+          "id": "crossbow",
+          "text": "Crossbow",
+          "href": "/en/item/cat/ranged/subcat/crossbow",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/ranged"
+    },
+    {
+      "text": "Resource",
+      "id": "resources",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "cloth",
+          "text": "Cloth",
+          "href": "/en/item/cat/resources/subcat/cloth",
+          "selectable": false
+        },
+        {
+          "id": "fiber",
+          "text": "Fiber",
+          "href": "/en/item/cat/resources/subcat/fiber",
+          "selectable": false
+        },
+        {
+          "id": "hide",
+          "text": "Hide",
+          "href": "/en/item/cat/resources/subcat/hide",
+          "selectable": false
+        },
+        {
+          "id": "leather",
+          "text": "Leather",
+          "href": "/en/item/cat/resources/subcat/leather",
+          "selectable": false
+        },
+        {
+          "id": "metalbar",
+          "text": "Metal Bar",
+          "href": "/en/item/cat/resources/subcat/metalbar",
+          "selectable": false
+        },
+        {
+          "id": "ore",
+          "text": "Ore",
+          "href": "/en/item/cat/resources/subcat/ore",
+          "selectable": false
+        },
+        {
+          "id": "other",
+          "text": "Other",
+          "href": "/en/item/cat/resources/subcat/other",
+          "selectable": false
+        },
+        {
+          "id": "planks",
+          "text": "Planks",
+          "href": "/en/item/cat/resources/subcat/planks",
+          "selectable": false
+        },
+        {
+          "id": "rock",
+          "text": "Rock",
+          "href": "/en/item/cat/resources/subcat/rock",
+          "selectable": false
+        },
+        {
+          "id": "stoneblock",
+          "text": "Stone Block",
+          "href": "/en/item/cat/resources/subcat/stoneblock",
+          "selectable": false
+        },
+        {
+          "id": "wood",
+          "text": "Wood",
+          "href": "/en/item/cat/resources/subcat/wood",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/resources"
+    },
+    {
+      "text": "Token",
+      "id": "token",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "arenasigils",
+          "text": "Arena Sigil",
+          "href": "/en/item/cat/token/subcat/arenasigils",
+          "selectable": false
+        },
+        {
+          "id": "event",
+          "text": "Event",
+          "href": "/en/item/cat/token/subcat/event",
+          "selectable": false
+        },
+        {
+          "id": "maps",
+          "text": "Map",
+          "href": "/en/item/cat/token/subcat/maps",
+          "selectable": false
+        },
+        {
+          "id": "other",
+          "text": "Other",
+          "href": "/en/item/cat/token/subcat/other",
+          "selectable": false
+        },
+        {
+          "id": "royalsigils",
+          "text": "Royal Sigil",
+          "href": "/en/item/cat/token/subcat/royalsigils",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/token"
+    },
+    {
+      "text": "Tool",
+      "id": "tools",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "demolitionhammer",
+          "text": "Demolition Hammer",
+          "href": "/en/item/cat/tools/subcat/demolitionhammer",
+          "selectable": false
+        },
+        {
+          "id": "fishing",
+          "text": "Fishing Rod",
+          "href": "/en/item/cat/tools/subcat/fishing",
+          "selectable": false
+        },
+        {
+          "id": "pickaxe",
+          "text": "Pickaxe",
+          "href": "/en/item/cat/tools/subcat/pickaxe",
+          "selectable": false
+        },
+        {
+          "id": "sickle",
+          "text": "Sickle",
+          "href": "/en/item/cat/tools/subcat/sickle",
+          "selectable": false
+        },
+        {
+          "id": "skinningknife",
+          "text": "Skinning Knife",
+          "href": "/en/item/cat/tools/subcat/skinningknife",
+          "selectable": false
+        },
+        {
+          "id": "stonehammer",
+          "text": "Stone Hammer",
+          "href": "/en/item/cat/tools/subcat/stonehammer",
+          "selectable": false
+        },
+        {
+          "id": "woodaxe",
+          "text": "Wood Axe",
+          "href": "/en/item/cat/tools/subcat/woodaxe",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/tools"
+    },
+    {
+      "text": "Trophies",
+      "id": "trophies",
+      "selectable": false,
+      "nodes": [
+        {
+          "id": "fibertrophy",
+          "text": "Fiber Trophy",
+          "href": "/en/item/cat/trophies/subcat/fibertrophy",
+          "selectable": false
+        },
+        {
+          "id": "fishtrophy",
+          "text": "Fishing Trophy",
+          "href": "/en/item/cat/trophies/subcat/fishtrophy",
+          "selectable": false
+        },
+        {
+          "id": "generaltrophy",
+          "text": "General Trophy",
+          "href": "/en/item/cat/trophies/subcat/generaltrophy",
+          "selectable": false
+        },
+        {
+          "id": "hidetrophy",
+          "text": "Hide Trophy",
+          "href": "/en/item/cat/trophies/subcat/hidetrophy",
+          "selectable": false
+        },
+        {
+          "id": "mercenarytrophy",
+          "text": "Mercenary Trophy",
+          "href": "/en/item/cat/trophies/subcat/mercenarytrophy",
+          "selectable": false
+        },
+        {
+          "id": "oretrophy",
+          "text": "Ore Trophy",
+          "href": "/en/item/cat/trophies/subcat/oretrophy",
+          "selectable": false
+        },
+        {
+          "id": "rocktrophy",
+          "text": "Stone Trophy",
+          "href": "/en/item/cat/trophies/subcat/rocktrophy",
+          "selectable": false
+        },
+        {
+          "id": "woodtrophy",
+          "text": "Wood Trophy",
+          "href": "/en/item/cat/trophies/subcat/woodtrophy",
+          "selectable": false
+        }
+      ],
+      "href": "/en/item/cat/trophies"
+    }
+  ],
+  "itemsForMarketData": "T3_FARM_OX_GROWN,T4_FARM_OX_GROWN,T5_FARM_OX_GROWN,T6_FARM_OX_GROWN,T7_FARM_OX_GROWN,T8_FARM_OX_GROWN,T3_FARM_HORSE_GROWN,T4_FARM_HORSE_GROWN,T5_FARM_HORSE_GROWN,T6_FARM_HORSE_GROWN,T7_FARM_HORSE_GROWN,T8_FARM_HORSE_GROWN,T6_FARM_DIREWOLF_GROWN,T7_FARM_DIREBOAR_GROWN,T8_FARM_DIREBEAR_GROWN,T7_FARM_SWAMPDRAGON_GROWN,T8_FARM_MAMMOTH_GROWN,T5_FARM_COUGAR_GROWN,T8_FARM_DIREWOLF_GROWN,T4_FARM_GIANTSTAG_GROWN,T6_FARM_GIANTSTAG_GROWN,T5_FARM_MOABIRD_FW_BRIDGEWATCH_GROWN,T5_FARM_DIREBEAR_FW_FORTSTERLING_GROWN,T5_FARM_DIREBOAR_FW_LYMHURST_GROWN,T5_FARM_RAM_FW_MARTLOCK_GROWN,T5_FARM_SWAMPDRAGON_FW_THETFORD_GROWN,T3_FARM_CHICKEN_GROWN,T4_FARM_GOAT_GROWN,T5_FARM_GOOSE_GROWN,T6_FARM_SHEEP_GROWN,T7_FARM_PIG_GROWN,T8_FARM_COW_GROWN"
+}

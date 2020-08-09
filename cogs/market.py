@@ -56,6 +56,7 @@ class Market(commands.Cog):
 			item_w = self.tier_processing(item_w)
 
 			# Item Search
+			print(item_w)
 			item_f = self.search(item_w)
 
 		item_name = item_f[0][1]['UniqueName']
@@ -324,9 +325,3 @@ class Market(commands.Cog):
 
 def setup(client):
 	client.add_cog(Market(client))
-
-
-if __name__ == '__main__':
-	m = Market(None)
-	for item in ['t7.1 warbow', 'T5_2H_WARBOW', 'cabbage']:
-		price = m.price(None, item)
