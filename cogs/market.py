@@ -1,7 +1,7 @@
 import io
 import json
 from datetime import date
-
+import logging
 import math
 import jellyfish as j
 import matplotlib.pyplot as plt
@@ -60,62 +60,65 @@ class Market(commands.Cog):
 
 		item_name = item_f[0][1]['UniqueName']
 
-		# Form url
-		if enchant_lvl is None:
-			enchant_str = ""
-		elif enchant_lvl == 0:
-			enchant_str = ""
-		else:
-			enchant_str = enchant_lvl
+		async with ctx.channel.typing():
+			# Form url
+			if enchant_lvl is None:
+				enchant_str = ""
+			elif enchant_lvl == 0:
+				enchant_str = ""
+			else:
+				enchant_str = enchant_lvl
 
-		currurl = self.base_url_current + item_name + enchant_str + "?locations=" + f"{self.locations[0]}" + "".join(
-			["," + "".join(x) for x in self.locations if x != self.locations[0]])
-		full_hisurl = self.base_url + item_name + enchant_str + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
-			["," + "".join(x) for x in self.locations if
-			 x != self.locations[0]]) + f"&time-scale={self.scale}"
-		thumb_url = f"https://gameinfo.albiononline.com/api/gameinfo/items/{item_name + enchant_str}.png?count=1"
+			currurl = self.base_url_current + item_name + enchant_str + "?locations=" + f"{self.locations[0]}" + "".join(
+				["," + "".join(x) for x in self.locations if x != self.locations[0]])
+			full_hisurl = self.base_url + item_name + enchant_str + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
+				["," + "".join(x) for x in self.locations if
+				 x != self.locations[0]]) + f"&time-scale={self.scale}"
+			logging.info(f"https://render.albiononline.com/v1/item/{item_name + enchant_str}.png?count=1&quality=1")
+			thumb_url = f"https://render.albiononline.com/v1/item/{item_name + enchant_str}.png?count=1&quality=1"
 
-		current_prices = self.c_price_table(currurl)
+			current_prices = self.c_price_table(currurl)
 
-		# Historical Data [Plotfile , Data]
-		h_data = self.full_graph(full_hisurl, current_prices)
+			# Historical Data [Plotfile , Data]
+			h_data = self.full_graph(full_hisurl, current_prices)
 
-		# Calculate Avg price
-		avg_price = []
-		avg_current_price = []
-		avg_sell_volume = []
-		for city in h_data[1]:
-			avg_price.append(int(h_data[1][city]['avg_price'].mean()))
-			avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
+			# Calculate Avg price
+			avg_price = []
+			avg_current_price = []
+			avg_sell_volume = []
+			for city in h_data[1]:
+				avg_price.append(int(h_data[1][city]['avg_price'].mean()))
+				avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
 
-		avg_current_price = [x for x in current_prices[1].loc['Normal', :] if not math.isnan(x)]
+			avg_current_price = [x for x in current_prices[1].loc['Normal', :] if not math.isnan(x)]
 
-		avg_p = self.c_game_currency(int(self.average(avg_price)))
-		avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
-		avg_sv = self.c_game_currency(int(self.average([x[1] for x in avg_sell_volume])))
+			avg_p = self.c_game_currency(int(self.average(avg_price)))
+			avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
+			avg_sv = self.c_game_currency(int(self.average([x[1] for x in avg_sell_volume])))
 
-		if len(avg_sell_volume) == 0:
-			best_cs = (None, 0)
-		else:
-			best_cs = max(avg_sell_volume, key=lambda item: item[1])
+			if len(avg_sell_volume) == 0:
+				best_cs = (None, 0)
+			else:
+				best_cs = max(avg_sell_volume, key=lambda item: item[1])
 
-		title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant_str.replace('@', '')})"
-		embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name + enchant_str}")
-		embed.set_thumbnail(url=thumb_url)
-		best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
-		embed.add_field(name="Avg Current Price (Normal)", value=avg_cp, inline=True)
-		embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
-		embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
-		embed.set_footer(text=f"Best City Sales : {best_cs_str}")
+			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant_str.replace('@', '')})"
+			embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name + enchant_str}")
+			print(thumb_url)
+			embed.set_thumbnail(url=thumb_url)
+			best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
+			embed.add_field(name="Avg Current Price (Normal)", value=avg_cp, inline=True)
+			embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
+			embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
+			embed.set_footer(text=f"Best City Sales : {best_cs_str}")
 
-		# Upload to discord
-		today = date.today()
-		filename = f'{item_name}-{today}'
-		h_data[0].seek(0)
-		file = File(h_data[0], filename=f"{filename}.png")
-		h_data[0].close()
-		embed.set_image(url=f"attachment://{filename}.png")
-		await ctx.send(file=file, embed=embed)
+			# Upload to discord
+			today = date.today()
+			filename = f'{item_name}-{today}'
+			h_data[0].seek(0)
+			file = File(h_data[0], filename=f"{filename}.png")
+			h_data[0].close()
+			embed.set_image(url=f"attachment://{filename}.png")
+			await ctx.send(file=file, embed=embed)
 
 	def c_price_table(self, currurl):
 		'''
