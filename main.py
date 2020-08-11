@@ -1,9 +1,11 @@
+import configparser
+import logging
+import os
+
 import discord
 from discord.ext import commands
-import os
+
 import keep_alive
-import logging
-import configparser
 
 # Load config.ini
 currentPath = os.path.dirname(os.path.realpath(__file__))
@@ -20,7 +22,7 @@ client = commands.Bot(
 
 # Set up logging to discord.log
 logger = logging.getLogger("discord")
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")

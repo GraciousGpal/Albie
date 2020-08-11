@@ -1,18 +1,21 @@
 import io
 import json
-from datetime import date
 import logging
 import math
+from datetime import date
+from urllib import request
+
 import jellyfish as j
 import matplotlib.pyplot as plt
 import pandas as pd
-import requests
 import requests as r
 import seaborn as sns
 from discord import Embed, File
 from discord.ext import commands
 from numpy import nan
 from tabulate import tabulate
+
+log = logging.getLogger(__name__)
 
 
 class Market(commands.Cog):
@@ -23,7 +26,18 @@ class Market(commands.Cog):
 		self.locations = ['Thetford', 'Martlock', 'Caerleon', 'Lymhurst', 'Bridgewatch', 'FortSterling',
 						  'BlackMarket']
 		self.scale = 6
-		self.dict = json.load(open("data/item_data.json", 'r', encoding='utf-8'))
+		self.itemList = "https://raw.githubusercontent.com/broderickhyman/ao-bin-dumps/master/formatted/items.json"
+
+		# Get updated verions of item files
+		try:
+			print('Getting Latest Items:)')
+			with request.urlopen(self.itemList) as url:
+				self.dict = json.loads(url.read().decode())
+			print('Latest Items downloaded)')
+		except Exception as e:
+			# Use fallback list of local items if download fails
+			self.dict = json.load(open("data/item_data.json", 'r', encoding='utf-8'))
+
 		self.item_list = [item['LocalizedNames']["EN-US"] for item in self.dict if item['LocalizedNames'] is not None]
 		self.id_list = [item['UniqueName'] for item in self.dict]
 		self.city_colours = {'Thetford': 'purple', 'Martlock': 'skyblue', 'Caerleon': 'red', 'Lymhurst': 'green',
@@ -38,45 +52,36 @@ class Market(commands.Cog):
 
 		item_w = item[0:]
 		id_c = False
-		enchant_lvl = None
 
 		# Id code detection
 		if item_w in self.id_list:
 			item_f = [(11, item) for item in self.dict if item['UniqueName'] == item_w]
+			tier, enchant = self.feature_extraction(item_w)
 			id_c = True
 
 		# Search Processing --
 		if not id_c:
-			# Set Enchant Lvl
-			processed_d = self.enchant_processing(item_w)
-			enchant_lvl = processed_d[1]
-			item_w = processed_d[0]
+			tier, enchant = self.feature_extraction(item_w)
+			list_v = [s for s in self.dict if s['LocalizedNames'] is not None]
+			if tier is not None:
+				list_v = [x for x in list_v if f'T{tier[0]}' in x['UniqueName']]
+				item_w = item_w.replace(f'T{tier[0]}', '')
+			if enchant is not None:
+				list_v = [x for x in list_v if f'@{enchant}' in x['UniqueName']]
+				item_w = item_w.replace(f'.{enchant} ', '')
 
-			# Tier Processing
-			item_w = self.tier_processing(item_w)
-
-			# Item Search
-			print(item_w)
-			item_f = self.search(item_w)
-
+			item_f = self.search(item_w, list_v)
 		item_name = item_f[0][1]['UniqueName']
 
 		async with ctx.channel.typing():
-			# Form url
-			if enchant_lvl is None:
-				enchant_str = ""
-			elif enchant_lvl == 0:
-				enchant_str = ""
-			else:
-				enchant_str = enchant_lvl
-
-			currurl = self.base_url_current + item_name + enchant_str + "?locations=" + f"{self.locations[0]}" + "".join(
+			currurl = self.base_url_current + item_name + "?locations=" + f"{self.locations[0]}" + "".join(
 				["," + "".join(x) for x in self.locations if x != self.locations[0]])
-			full_hisurl = self.base_url + item_name + enchant_str + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
+			full_hisurl = self.base_url + item_name + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
 				["," + "".join(x) for x in self.locations if
 				 x != self.locations[0]]) + f"&time-scale={self.scale}"
-			logging.info(f"https://render.albiononline.com/v1/item/{item_name + enchant_str}.png?count=1&quality=1")
-			thumb_url = f"https://render.albiononline.com/v1/item/{item_name + enchant_str}.png?count=1&quality=1"
+			print(full_hisurl)
+			log.info(f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1")
+			thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
 
 			current_prices = self.c_price_table(currurl)
 
@@ -102,19 +107,20 @@ class Market(commands.Cog):
 			else:
 				best_cs = max(avg_sell_volume, key=lambda item: item[1])
 
-			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant_str.replace('@', '')})"
-			embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name + enchant_str}")
+			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant})"
+			embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name}")
 			print(thumb_url)
 			embed.set_thumbnail(url=thumb_url)
 			best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
 			embed.add_field(name="Avg Current Price (Normal)", value=avg_cp, inline=True)
 			embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
 			embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
+			# embed.add_field(name="Other search Suggestions", value=str([x[1]['LocalizedNames'][x[2]] for x in item_f[1:4]]), inline=True)
 			embed.set_footer(text=f"Best City Sales : {best_cs_str}")
 
 			# Upload to discord
 			today = date.today()
-			filename = f'{item_name}-{today}'
+			filename = f'{today}'
 			h_data[0].seek(0)
 			file = File(h_data[0], filename=f"{filename}.png")
 			h_data[0].close()
@@ -172,18 +178,16 @@ class Market(commands.Cog):
 			data[city].timestamp = pd.to_datetime(data[city].timestamp)
 
 		# Removing Outliers
-		rm_out = True
 		w_data = data.copy()
-		if rm_out:
-			for city in data:
-				a = w_data[city]
+		for city in data:
+			a = w_data[city]
 
-				# Remove sets with less than 10 data points
-				if a['avg_price'].size < 10:
-					del w_data[city]
-				else:
-					# Remove values that do not lie within the 5% and 95% quantile
-					a = a[a['avg_price'].between(a['avg_price'].quantile(.05), a['avg_price'].quantile(.95))]
+			# Remove sets with less than 10 data points
+			if a['avg_price'].size < 10:
+				del w_data[city]
+			else:
+				# Remove values that do not lie within the 5% and 95% quantile
+				w_data[city] = a[a['avg_price'].between(a['avg_price'].quantile(.05), a['avg_price'].quantile(.95))]
 
 		sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1',
 					'text.color': '.65', "lines.linewidth": 1})
@@ -230,8 +234,6 @@ class Market(commands.Cog):
 		"""
 		if string in self.id_list:
 			item_w = [(11, item) for item in self.dict if item['UniqueName'] == string][0]
-		else:
-			item_w = self.search(string)
 		return item_w
 
 	def enchant_processing(self, item):
@@ -258,7 +260,17 @@ class Market(commands.Cog):
 			item = item.replace(tier[1], self.tiers[tier[0]])
 		return item
 
-	def search(self, name):
+	def feature_extraction(self, item):
+		enchant = None
+		for lvl in [".1", ".2", ".3", '@1', '@2', '@3']:
+			if lvl in item:
+				enchant = int(lvl[1])
+
+		tier = self.get_tier(item)
+
+		return tier, enchant
+
+	def search(self, name, list_v):
 		"""
 		Uses Jaro Winkler method to find the closest match for the input to a list of items.
 		:param name:
@@ -267,11 +279,19 @@ class Market(commands.Cog):
 		if name in self.id_list:
 			return [(11, item) for item in self.dict if item['UniqueName'] == name]
 		else:
-			r = [(j.jaro_winkler(item['LocalizedNames']["EN-US"].lower(), name.lower()), item) for item in
-				 self.dict if
-				 item['LocalizedNames'] is not None]
-		r.sort(key=self.sort_sim, reverse=True)
-		return r[0:5]
+			rating = [[j.jaro_winkler_similarity(item_['UniqueName'].lower(), name.lower()), item_, None] for
+					  item_ in list_v]
+			for s in list_v:
+				for language in s['LocalizedNames']:
+					rating.append(
+						[j.jaro_winkler_similarity(s['LocalizedNames'][language].lower(), name.lower()), s, language])
+
+			rating.sort(key=self.sort_sim, reverse=True)
+			most_likely_lang = rating[0][2]
+
+			for nolang in [x for x in rating if x[2] is None]:
+				nolang[2] = most_likely_lang
+			return rating[0:5]
 
 	def sort_sim(self, val):
 		return val[0]
@@ -287,9 +307,9 @@ class Market(commands.Cog):
 		upper_case = ["T" + str(no) for no in range(1, 9)]
 		for lower, upper in zip(lower_case, upper_case):
 			if upper in string:
-				return upper_case.index(upper), upper
+				return upper_case.index(upper) + 1, upper
 			elif lower in string:
-				return lower_case.index(lower), lower
+				return lower_case.index(lower) + 1, lower
 		return None
 
 	def get_data(self, url):
