@@ -48,7 +48,10 @@ class Market(commands.Cog):
 		self.quality_tiers = ['Normal', 'Good', 'Outstanding', 'Excellent', 'Masterpiece']
 
 	@commands.command(aliases=["price", "p"])
-	async def prices(self, ctx, *, item):
+	async def prices(self, ctx, *, item=None):
+		if item is None:
+			await ctx.send('Please enter an object to be searched:\n e.g  ```.p t6.1 hunter hood\n .price t4 hide ```')
+			return
 
 		item_w = item[0:]
 		id_c = False
@@ -116,7 +119,8 @@ class Market(commands.Cog):
 			embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
 			embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
 			# embed.add_field(name="Other search Suggestions", value=str([x[1]['LocalizedNames'][x[2]] for x in item_f[1:4]]), inline=True)
-			embed.set_footer(text=f"Best City Sales : {best_cs_str}")
+			embed.set_footer(
+				text=f"Best City Sales : {best_cs_str}\nSuggested Searches: {str([x[1]['LocalizedNames']['EN-US'] for x in item_f[1:4]]).replace('[', '').replace(']', '')}")
 
 			# Upload to discord
 			today = date.today()
