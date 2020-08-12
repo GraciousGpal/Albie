@@ -1,7 +1,7 @@
-import discord
-from discord.ext import commands
 import configparser
 import os
+
+from discord.ext import commands
 
 
 class Utils(commands.Cog):

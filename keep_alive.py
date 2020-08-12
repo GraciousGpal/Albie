@@ -1,12 +1,13 @@
-from flask import Flask
 from threading import Thread
+
+from flask import Flask
 
 app = Flask("")
 
 
 @app.route("/")
 def main():
-    return "Assistant is up!"
+	return "Assistant is up!"
 
 
 def run():
