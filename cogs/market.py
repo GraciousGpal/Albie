@@ -90,7 +90,7 @@ class Market(commands.Cog):
 			full_hisurl = self.base_url + item_name + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
 				["," + "".join(x) for x in self.locations if
 				 x != self.locations[0]]) + f"&time-scale={self.scale}"
-			print(full_hisurl)
+			print(item_name, full_hisurl)
 			log.info(f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1")
 			thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
 
