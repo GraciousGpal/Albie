@@ -27,7 +27,7 @@ class Market(commands.Cog):
 		self.locations = ['Thetford', 'Martlock', 'Caerleon', 'Lymhurst', 'Bridgewatch', 'FortSterling',
 						  'BlackMarket']
 		self.scale = 6
-		self.itemList = "https://raw.githubusercontent.com/broderickhyman/ao-bin-dumps/master/formatted/items.json"
+		self.itemList = "https://raw.githubusercontent.com/augusto501/ao-bin-dumps/master/formatted/items.json"
 
 		# Get updated verions of item files
 		try:
