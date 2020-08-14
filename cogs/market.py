@@ -90,7 +90,7 @@ class Market(commands.Cog):
 			full_hisurl = self.base_url + item_name + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
 				["," + "".join(x) for x in self.locations if
 				 x != self.locations[0]]) + f"&time-scale={self.scale}"
-			print(item_name, full_hisurl)
+			print(item, item_name, full_hisurl)
 			log.info(f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1")
 			thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
 
@@ -106,8 +106,11 @@ class Market(commands.Cog):
 			for city in h_data[1]:
 				avg_price.append(int(h_data[1][city]['avg_price'].mean()))
 				avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
-
-			avg_current_price = [x for x in current_prices[1].loc['Normal', :] if not math.isnan(x)]
+			try:
+				avg_current_price = [x for x in current_prices[1].loc['Normal', :] if not math.isnan(x)]
+			except Exception as e:
+				print(e)
+				await ctx.send('``` An error occured in fetching data, please let the developer know```')
 
 			avg_p = self.c_game_currency(int(self.average(avg_price)))
 			avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
