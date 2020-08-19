@@ -91,56 +91,72 @@ class Market(commands.Cog):
 				["," + "".join(x) for x in self.locations if
 				 x != self.locations[0]]) + f"&time-scale={self.scale}"
 			print(item, item_name, full_hisurl)
-			log.info(f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1")
 			thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
 
 			current_prices = self.c_price_table(currurl)
 
-			# Historical Data [Plotfile , Data]
-			h_data = self.full_graph(full_hisurl, current_prices)
+			# Start embed object
+			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant})"
+			embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name}")
+			embed.set_thumbnail(url=thumb_url)
+			best_cs_str = None
 
-			# Calculate Avg price
+			# Initiate Avg price variables
 			avg_price = []
 			avg_current_price = []
 			avg_sell_volume = []
-			for city in h_data[1]:
-				avg_price.append(int(h_data[1][city]['avg_price'].mean()))
-				avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
+
+			# Current Data
+			# Current Data
+			if len(current_prices[1].index) != 0:
+
+				normalcheck = [str(x) for x in current_prices[1].T]
+				if 'Normal' in normalcheck:
+					avg_current_price = [x for x in current_prices[1].loc['Normal', :] if not math.isnan(x)]
+					avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
+					embed.add_field(name="Avg Current Price (Normal)", value=avg_cp, inline=True)
+
+			# Historical Data
+
+			# Historical Data [Plotfile , Data]
 			try:
-				avg_current_price = [x for x in current_prices[1].loc['Normal', :] if not math.isnan(x)]
+				h_data = self.full_graph(full_hisurl, current_prices)
+				for city in h_data[1]:
+					avg_price.append(int(h_data[1][city]['avg_price'].mean()))
+					avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
+
+				avg_p = self.c_game_currency(int(self.average(avg_price)))
+				avg_sv = self.c_game_currency(int(self.average([x[1] for x in avg_sell_volume])))
+
+				if len(avg_sell_volume) == 0:
+					best_cs = (None, 0)
+				else:
+					best_cs = max(avg_sell_volume, key=lambda item: item[1])
+
+				best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
+
+				embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
+				embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
+
 			except Exception as e:
-				print(e)
-				await ctx.send('``` An error occured in fetching data, please let the developer know```')
+				log.error(e)
 
-			avg_p = self.c_game_currency(int(self.average(avg_price)))
-			avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
-			avg_sv = self.c_game_currency(int(self.average([x[1] for x in avg_sell_volume])))
-
-			if len(avg_sell_volume) == 0:
-				best_cs = (None, 0)
-			else:
-				best_cs = max(avg_sell_volume, key=lambda item: item[1])
-
-			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant})"
-			embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name}")
-			print(thumb_url)
-			embed.set_thumbnail(url=thumb_url)
-			best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
-			embed.add_field(name="Avg Current Price (Normal)", value=avg_cp, inline=True)
-			embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
-			embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
-			# embed.add_field(name="Other search Suggestions", value=str([x[1]['LocalizedNames'][x[2]] for x in item_f[1:4]]), inline=True)
 			embed.set_footer(
 				text=f"Best City Sales : {best_cs_str}\nSuggested Searches: {str([x[1]['LocalizedNames']['EN-US'] for x in item_f[1:4]]).replace('[', '').replace(']', '')}")
 
-			# Upload to discord
-			today = date.today()
-			filename = f'{today}'
-			h_data[0].seek(0)
-			file = File(h_data[0], filename=f"{filename}.png")
-			h_data[0].close()
-			embed.set_image(url=f"attachment://{filename}.png")
-			await ctx.send(file=file, embed=embed)
+			if h_data[0] is not None:
+				# Upload to discord
+				today = date.today()
+				filename = f'{today}'
+				h_data[0].seek(0)
+				file = File(h_data[0], filename=f"{filename}.png")
+				h_data[0].close()
+				embed.set_image(url=f"attachment://{filename}.png")
+				await ctx.send(file=file, embed=embed)
+			else:
+				await ctx.send(embed=embed)
+				await ctx.send(
+					'```Error Fetching history, No data in the Albion Data Project directory.\nThis happens because no one has seen this item in the market with the albion data tool installed.``` To help us get more accurate results and more data please check out albion data project and install their client. \nhttps://www.albion-online-data.com/')
 
 	def item_match_older_formula(self, input_word, list_v):
 		"""Find closest matching item name and ID of input item.
@@ -272,12 +288,14 @@ class Market(commands.Cog):
 							 cbar=False)
 			a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
 			a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
-		else:
+		elif len(current_price_data[1].index) != 0:
 			no_plots = 0
 			fig, ax = plt.subplots(1, figsize=(20, 6))
 			a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), fmt='', cbar=False)
 			a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
 			a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
+		else:
+			return None, []
 
 		# Plotting avg_prices --------------------
 		# ax.patch.set_facecolor('black')
