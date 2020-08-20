@@ -5,8 +5,6 @@ import os
 import discord
 from discord.ext import commands
 
-import keep_alive
-
 # Load config.ini
 currentPath = os.path.dirname(os.path.realpath(__file__))
 configs = configparser.ConfigParser()
@@ -29,7 +27,8 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-keep_alive.keep_alive()
+
+# keep_alive.keep_alive()
 
 
 @client.event
@@ -52,9 +51,9 @@ async def on_ready():
             if filename.endswith(".py"):
                 print(f"Loading...{filename[:-3]}")
                 client.load_extension(f"cogs.{filename[:-3]}")
+                print(f"Loaded {filename[:-3]}")
     except Exception as e:
         print(e)
-        pass
 
     # Activity to 'Ready'
     await client.change_presence(activity=discord.Game("Ready"))

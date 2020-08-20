@@ -15,7 +15,7 @@ import requests as r
 import seaborn as sns
 from discord import Embed, File
 from discord.ext import commands
-from fuzzywuzzy import fuzz
+from libs.token_match import token_set_ratio
 from numpy import nan
 from tabulate import tabulate
 
@@ -35,11 +35,11 @@ def timing(f):
 
 
 async def multi(item_, name):
-	return [fuzz.token_set_ratio(item_['UniqueName'].lower(), name.lower()), item_, None]
+	return [token_set_ratio(item_['UniqueName'].lower(), name.lower()), item_, None]
 
 
 async def multi2(item_, name):
-	return [fuzz.token_set_ratio(item_[0], name.lower()), item_[1], None]
+	return [token_set_ratio(item_[0], name.lower()), item_[1], None]
 
 
 def average(lst):
@@ -200,7 +200,7 @@ class Market(commands.Cog):
 			current_prices = self.c_price_table(currurl)
 
 			# Start embed object
-			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant})"
+			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant}) (ID: {item_f[0][1]['UniqueName']})"
 			embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name}")
 			embed.set_thumbnail(url=thumb_url)
 			best_cs_str = None
@@ -401,7 +401,7 @@ class Market(commands.Cog):
 	async def search_v2(self, name, list_v):
 		"""
 		Improved search with better accuracy at the cost of speed,
-		To reduce the speed cost multiple threads are used.
+		To reduce the speed cost multiple async tasks are used.
 		:param name:
 		:param list_v:
 		:return:

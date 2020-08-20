@@ -5,10 +5,11 @@ env
 *.pyc
 keys.json
 decom
-test*
+libs/setup.py
 data.zip
 venv
 *.db
 *.vscode
 .vscode/settings.json
 decom
+Decom*
