@@ -1,8 +1,11 @@
+import asyncio
 import io
 import json
 import logging
 import math
 from datetime import date
+from functools import wraps
+from timeit import default_timer as timer
 from urllib import request
 
 import jellyfish as j
@@ -12,10 +15,111 @@ import requests as r
 import seaborn as sns
 from discord import Embed, File
 from discord.ext import commands
+from fuzzywuzzy import fuzz
 from numpy import nan
 from tabulate import tabulate
 
 log = logging.getLogger(__name__)
+
+
+def timing(f):
+	@wraps(f)
+	async def wrapper(*args, **kwargs):
+		start = timer()
+		result = await f(*args, **kwargs)
+		elapsed_time = timer() - start
+		print(f'Elapsed time: {elapsed_time}')
+		return result
+
+	return wrapper
+
+
+async def multi(item_, name):
+	return [fuzz.token_set_ratio(item_['UniqueName'].lower(), name.lower()), item_, None]
+
+
+async def multi2(item_, name):
+	return [fuzz.token_set_ratio(item_[0], name.lower()), item_[1], None]
+
+
+def average(lst):
+	if len(lst) == 0:
+		return 0
+	return sum(lst) / len(lst)
+
+
+def c_game_currency(no):
+	if type(no) == float or type(no) == int:
+		if no >= 1000000000:
+			return str(round(no / 1000000000, 2)) + "b"
+		elif no >= 1000000:
+			return str(round(no / 1000000, 2)) + "m"
+		elif no >= 1000:
+			return str(round(no / 1000, 2)) + "k"
+		else:
+			return str(no)
+	else:
+		return str(no)
+
+
+def c_game_series(number):
+	return number.apply(c_game_currency)
+
+
+def get_data(url):
+	"""
+	Gets the data from the url and converts to Json
+	:param url:
+	:return:
+	"""
+	data = r.get(url).json()
+	return data
+
+
+def get_tier(string):
+	"""
+	Checks for tier info in string and returns tier-1 as an int and tier string
+	in a tuple
+	:param string:
+	:return:
+	"""
+	lower_case = ["t" + str(no) for no in range(1, 9)]
+	upper_case = ["T" + str(no) for no in range(1, 9)]
+	for lower, upper in zip(lower_case, upper_case):
+		if upper in string:
+			return upper_case.index(upper) + 1, upper
+		elif lower in string:
+			return lower_case.index(lower) + 1, lower
+	return None
+
+
+def sort_sim(val):
+	return val[0]
+
+
+def feature_extraction(item):
+	enchant = None
+	for lvl in [".1", ".2", ".3", '@1', '@2', '@3']:
+		if lvl in item:
+			enchant = int(lvl[1])
+
+	tier = get_tier(item)
+
+	return tier, enchant
+
+
+def enchant_processing(item):
+	"""
+	Detect if there is enchantment input in string
+	:param item:
+	:return:
+	"""
+	enchant_lvl = 0
+	for lvl in [".1", ".2", ".3"]:
+		if lvl in item:
+			item = item.replace(lvl, "")
+			enchant_lvl = lvl.replace('.', '@')
+	return item, enchant_lvl
 
 
 class Market(commands.Cog):
@@ -48,6 +152,7 @@ class Market(commands.Cog):
 		self.quality_tiers = ['Normal', 'Good', 'Outstanding', 'Excellent', 'Masterpiece']
 
 	@commands.command(aliases=["price", "p"])
+	@timing
 	async def prices(self, ctx, *, item=None):
 		"""
 		Gets the price of an item and its history
@@ -66,12 +171,12 @@ class Market(commands.Cog):
 		# Id code detection
 		if item_w in self.id_list:
 			item_f = [(11, item) for item in self.dict if item['UniqueName'] == item_w]
-			tier, enchant = self.feature_extraction(item_w)
+			tier, enchant = feature_extraction(item_w)
 			id_c = True
 
 		# Search Processing --
 		if not id_c:
-			tier, enchant = self.feature_extraction(item_w)
+			tier, enchant = feature_extraction(item_w)
 			list_v = [s for s in self.dict if s['LocalizedNames'] is not None]
 			if tier is not None:
 				list_v = [x for x in list_v if f'T{tier[0]}' in x['UniqueName']]
@@ -80,7 +185,7 @@ class Market(commands.Cog):
 				list_v = [x for x in list_v if f'@{enchant}' in x['UniqueName']]
 				item_w = item_w.replace(f'.{enchant} ', '')
 
-			item_f = self.search(item_w, list_v)
+			item_f = await self.search_v2(item_w, list_v)
 		item_name = item_f[0][1]['UniqueName']
 
 		async with ctx.channel.typing():
@@ -112,7 +217,7 @@ class Market(commands.Cog):
 				normalcheck = [str(x) for x in current_prices[1].T]
 				if 'Normal' in normalcheck:
 					avg_current_price = [x for x in current_prices[1].loc['Normal', :] if not math.isnan(x)]
-					avg_cp = self.c_game_currency(int(self.average(avg_current_price)))
+					avg_cp = c_game_currency(int(average(avg_current_price)))
 					embed.add_field(name="Avg Current Price (Normal)", value=avg_cp, inline=True)
 
 			# Historical Data
@@ -124,21 +229,21 @@ class Market(commands.Cog):
 					avg_price.append(int(h_data[1][city]['avg_price'].mean()))
 					avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
 
-				avg_p = self.c_game_currency(int(self.average(avg_price)))
-				avg_sv = self.c_game_currency(int(self.average([x[1] for x in avg_sell_volume])))
+				avg_p = c_game_currency(int(average(avg_price)))
+				avg_sv = c_game_currency(int(average([x[1] for x in avg_sell_volume])))
 
 				if len(avg_sell_volume) == 0:
 					best_cs = (None, 0)
 				else:
 					best_cs = max(avg_sell_volume, key=lambda item: item[1])
 
-				best_cs_str = f'{best_cs[0]} ({self.c_game_currency(best_cs[1])})'
+				best_cs_str = f'{best_cs[0]} ({c_game_currency(best_cs[1])})'
 
 				embed.add_field(name="Avg Historical Price (Normal)", value=avg_p, inline=True)
 				embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
 
 			except Exception as e:
-				log.error(e)
+				print(e)
 
 			embed.set_footer(
 				text=f"Best City Sales : {best_cs_str}\nSuggested Searches: {str([x[1]['LocalizedNames']['EN-US'] for x in item_f[1:4]]).replace('[', '').replace(']', '')}")
@@ -157,8 +262,6 @@ class Market(commands.Cog):
 				await ctx.send(
 					'```Error Fetching history, No data in the Albion Data Project directory.\nThis happens because no one has seen this item in the market with the albion data tool installed.``` To help us get more accurate results and more data please check out albion data project and install their client. \nhttps://www.albion-online-data.com/')
 
-
-
 	def c_price_table(self, currurl):
 		'''
 		Generates an ASCII table with current price information
@@ -166,7 +269,7 @@ class Market(commands.Cog):
 		:return:
 		'''
 		# Get Data
-		cdata = self.get_data(currurl)
+		cdata = get_data(currurl)
 
 		# Table Creation
 		city_table = {}
@@ -187,7 +290,7 @@ class Market(commands.Cog):
 		frame = frame.dropna(axis=1, how='all')
 
 		# Remove Nan and convert number into the game format
-		frame2 = frame.apply(self.c_game_series, axis=0)
+		frame2 = frame.apply(c_game_series, axis=0)
 		frame2 = frame2.fillna('')
 
 		return tabulate(frame, headers="keys", tablefmt="fancy_grid"), frame, frame2
@@ -199,7 +302,7 @@ class Market(commands.Cog):
 		:return:
 		'''
 		# Get Data
-		cdata = self.get_data(url)
+		cdata = get_data(url)
 
 		# PreProcess Json Data
 		data = {}
@@ -260,53 +363,21 @@ class Market(commands.Cog):
 		plt.savefig(buf_p1, format='png')
 		return buf_p1, w_data
 
-	def id_detection(self, string):
-		"""
-		Detects Item ID codes in input
-		:param string:
-		:return:
-		"""
-		if string in self.id_list:
-			item_w = [(11, item) for item in self.dict if item['UniqueName'] == string][0]
-		return item_w
-
-	def enchant_processing(self, item):
-		"""
-		Detect if there is enchantment input in string
-		:param item:
-		:return:
-		"""
-		enchant_lvl = 0
-		for lvl in [".1", ".2", ".3"]:
-			if lvl in item:
-				item = item.replace(lvl, "")
-				enchant_lvl = lvl.replace('.', '@')
-		return item, enchant_lvl
-
 	def tier_processing(self, item):
 		"""
 		Detect Tier info in string and formats it to the correct search term
 		:param item:
 		:return:
 		"""
-		tier = self.get_tier(item)
+		tier = get_tier(item)
 		if tier is not None:
 			item = item.replace(tier[1], self.tiers[tier[0]])
 		return item
 
-	def feature_extraction(self, item):
-		enchant = None
-		for lvl in [".1", ".2", ".3", '@1', '@2', '@3']:
-			if lvl in item:
-				enchant = int(lvl[1])
-
-		tier = self.get_tier(item)
-
-		return tier, enchant
-
-	def search(self, name, list_v):
+	async def search(self, name, list_v):
 		"""
 		Uses Jaro Winkler method to find the closest match for the input to a list of items.
+		:param list_v:
 		:param name:
 		:return:
 		"""
@@ -320,61 +391,45 @@ class Market(commands.Cog):
 					rating.append(
 						[j.jaro_winkler_similarity(s['LocalizedNames'][language].lower(), name.lower()), s, language])
 
-			rating.sort(key=self.sort_sim, reverse=True)
+			rating.sort(key=sort_sim, reverse=True)
 			most_likely_lang = rating[0][2]
 
 			for nolang in [x for x in rating if x[2] is None]:
 				nolang[2] = most_likely_lang
 			return rating[0:5]
 
-	def sort_sim(self, val):
-		return val[0]
-
-	def get_tier(self, string):
+	async def search_v2(self, name, list_v):
 		"""
-		Checks for tier info in string and returns tier-1 as an int and tier string
-		in a tuple
-		:param string:
+		Improved search with better accuracy at the cost of speed,
+		To reduce the speed cost multiple threads are used.
+		:param name:
+		:param list_v:
 		:return:
 		"""
-		lower_case = ["t" + str(no) for no in range(1, 9)]
-		upper_case = ["T" + str(no) for no in range(1, 9)]
-		for lower, upper in zip(lower_case, upper_case):
-			if upper in string:
-				return upper_case.index(upper) + 1, upper
-			elif lower in string:
-				return lower_case.index(lower) + 1, lower
-		return None
 
-	def get_data(self, url):
-		"""
-		Gets the data from the url and converts to Json
-		:param url:
-		:return:
-		"""
-		data = r.get(url).json()
-		return data
-
-	def c_game_series(self, number):
-		return number.apply(self.c_game_currency)
-
-	def c_game_currency(self, no):
-		if type(no) == float or type(no) == int:
-			if no >= 1000000000:
-				return str(round(no / 1000000000, 2)) + "b"
-			elif no >= 1000000:
-				return str(round(no / 1000000, 2)) + "m"
-			elif no >= 1000:
-				return str(round(no / 1000, 2)) + "k"
-			else:
-				return str(no)
+		if name in self.id_list:
+			return [(11, item) for item in self.dict if item['UniqueName'] == name]
 		else:
-			return str(no)
+			task_1 = (multi(term, name=name) for term in list_v)
+			list_v2 = []
+			for item in list_v:
+				for language in item['LocalizedNames']:
+					list_v2.append((item['LocalizedNames'][language].lower(), item))
 
-	def average(self, lst):
-		if len(lst) == 0:
-			return 0
-		return sum(lst) / len(lst)
+			task_2 = (multi2(term, name=name) for term in list_v2)
+
+			rating = await asyncio.gather(*task_1, return_exceptions=True)
+			rating2 = await asyncio.gather(*task_2, return_exceptions=True)
+
+			for item in rating2:
+				rating.append(item)
+
+			rating.sort(key=sort_sim, reverse=True)
+			most_likely_lang = rating[0][2]
+
+			for nolang in [x for x in rating if x[2] is None]:
+				nolang[2] = most_likely_lang
+			return rating[0:5]
 
 
 def setup(client):
