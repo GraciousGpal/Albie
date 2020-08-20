@@ -1,4 +1,3 @@
-import difflib
 import io
 import json
 import logging
@@ -81,7 +80,7 @@ class Market(commands.Cog):
 				list_v = [x for x in list_v if f'@{enchant}' in x['UniqueName']]
 				item_w = item_w.replace(f'.{enchant} ', '')
 
-			item_f = self.item_match_older_formula(item_w, list_v)
+			item_f = self.search(item_w, list_v)
 		item_name = item_f[0][1]['UniqueName']
 
 		async with ctx.channel.typing():
@@ -158,63 +157,7 @@ class Market(commands.Cog):
 				await ctx.send(
 					'```Error Fetching history, No data in the Albion Data Project directory.\nThis happens because no one has seen this item in the market with the albion data tool installed.``` To help us get more accurate results and more data please check out albion data project and install their client. \nhttps://www.albion-online-data.com/')
 
-	def item_match_older_formula(self, input_word, list_v):
-		"""Find closest matching item name and ID of input item.
-		- Matches both item ID (UniqueName) and item name (LocalizedNames)
-		- Uses difflib.
-		- Returns 4 closest match.
-		"""
-		j_dists = []
 
-		# Read item list
-		data = list_v
-
-		# Loop through each item in item.json
-		# Store distance and item index of each item
-		for (i, indiv_data) in enumerate(data):
-
-			# Calculate distance for item ID (UniqueName)
-			try:
-				w1 = input_word.lower()
-				w2 = indiv_data["UniqueName"].lower()
-
-				# Use difflib's SequenceMatcher
-				j_dist = 1 - difflib.SequenceMatcher(None, w1, w2).ratio()
-				j_dists.append([j_dist, i])
-
-			# If item has no 'UniqueName'
-			except:
-				# Max distance is 1
-				j_dists.append([1, i])
-
-			# Calculate distance for item name (LocalizedNames)
-			try:
-				w1 = input_word.lower()
-
-				# Get distance for all localizations
-				local_dists = []
-				for name in indiv_data["LocalizedNames"]:
-					w2 = indiv_data["LocalizedNames"][name].lower()
-
-					local_dist = 1 - difflib.SequenceMatcher(None, w1, w2).ratio()
-					local_dists.append(local_dist)
-
-				# Pick the closest distance as j_dist
-				j_dist = min(local_dists)
-				j_dists.append([j_dist, i])
-
-			# If item has no 'LocalizedNames'
-			except:
-				j_dists.append([1, i])
-
-		# Sort JDists
-		# Closest match has lowest distance
-		j_dists = sorted(j_dists)
-
-		# Get item names and IDs of first 4 closest match
-		data = [(11, data[j_dist[1]], data[j_dist[1]]['LocalizedNames']['EN-US']) for j_dist in j_dists[:4]]
-
-		return data
 
 	def c_price_table(self, currurl):
 		'''
