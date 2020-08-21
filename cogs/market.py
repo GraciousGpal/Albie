@@ -200,7 +200,7 @@ class Market(commands.Cog):
 			current_prices = self.c_price_table(currurl)
 
 			# Start embed object
-			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant}) (ID: {item_f[0][1]['UniqueName']})"
+			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant})\n(ID: {item_f[0][1]['UniqueName']})"
 			embed = Embed(title=title, url=f"https://www.albiononline2d.com/en/item/id/{item_name}")
 			embed.set_thumbnail(url=thumb_url)
 			best_cs_str = None

@@ -4,8 +4,7 @@ import sys
 
 from Levenshtein import *
 
-
-class SequenceMatcher:
+cdef class SequenceMatcher:
     """A SequenceMatcher-like class built on the top of Levenshtein"""
 
     def _reset_cache(self):
@@ -72,7 +71,6 @@ class SequenceMatcher:
             self._distance = distance(self._str1, self._str2)
         return self._distance
 
-
 PY3 = sys.version_info[0] == 3
 
 bad_chars = str("").join([chr(i) for i in range(128, 256)])  # ascii dammit!
@@ -90,13 +88,13 @@ def check_for_none(func):
 
     return decorator
 
-def asciionly(s):
+cdef str asciionly(s):
     if PY3:
         return s.translate(translation_table)
     else:
         return s.translate(None, bad_chars)
 
-def asciidammit(s):
+cdef str asciidammit(s):
     if type(s) is str:
         return asciionly(s)
     elif type(s) is unicode:
@@ -160,7 +158,7 @@ def check_empty_string(func):
 
     return decorator
 
-def make_type_consistent(s1, s2):
+cdef str make_type_consistent(s1, s2):
     """If both objects aren't either both string or unicode instances force them to unicode"""
     if isinstance(s1, str) and isinstance(s2, str):
         return s1, s2
@@ -189,7 +187,7 @@ def partial_ratio(s1, s2):
     m = SequenceMatcher(None, shorter, longer)
     blocks = m.get_matching_blocks()
 
-cpdef bint validate_string(s):
+cdef bint validate_string(s):
     """
     Check input has length and that length > 0
 
