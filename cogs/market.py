@@ -1,4 +1,3 @@
-import asyncio
 import io
 import json
 import logging
@@ -34,11 +33,11 @@ def timing(f):
 	return wrapper
 
 
-async def multi(item_, name):
+def multi(item_, name):
 	return [token_set_ratio(item_['UniqueName'].lower(), name.lower()), item_, None]
 
 
-async def multi2(item_, name):
+def multi2(item_, name):
 	return [token_set_ratio(item_[0], name.lower()), item_[1], None]
 
 
@@ -410,16 +409,13 @@ class Market(commands.Cog):
 		if name in self.id_list:
 			return [(11, item) for item in self.dict if item['UniqueName'] == name]
 		else:
-			task_1 = (multi(term, name=name) for term in list_v)
+			rating = [multi(term, name=name) for term in list_v]
 			list_v2 = []
 			for item in list_v:
 				for language in item['LocalizedNames']:
 					list_v2.append((item['LocalizedNames'][language].lower(), item))
 
-			task_2 = (multi2(term, name=name) for term in list_v2)
-
-			rating = await asyncio.gather(*task_1, return_exceptions=True)
-			rating2 = await asyncio.gather(*task_2, return_exceptions=True)
+			rating2 = [multi2(term, name=name) for term in list_v2]
 
 			for item in rating2:
 				rating.append(item)
