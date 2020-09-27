@@ -7,9 +7,9 @@ from functools import wraps
 from timeit import default_timer as timer
 from urllib import request
 
+import aiohttp
 import matplotlib.pyplot as plt
 import pandas as pd
-import requests as r
 import seaborn as sns
 from discord import Embed, File
 from discord.ext import commands
@@ -18,6 +18,7 @@ from numpy import nan
 from tabulate import tabulate
 
 log = logging.getLogger(__name__)
+session = aiohttp.ClientSession()
 
 
 def timing(f):
@@ -56,13 +57,17 @@ def c_game_series(number):
 	return number.apply(c_game_currency)
 
 
-def get_data(url):
+async def get_data(url):
 	"""
 	Gets the data from the url and converts to Json
 	:param url:
 	:return:
 	"""
-	data = r.get(url).json()
+	# data = r.get(url).json()
+
+	async with session.get(url) as resp:
+		data = await resp.json()
+
 	return data
 
 
@@ -190,7 +195,7 @@ class Market(commands.Cog):
 			thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
 
 			try:
-				current_prices = self.c_price_table(currurl)
+				current_prices = await self.c_price_table(currurl)
 			except json.decoder.JSONDecodeError:
 				embed = Embed(color=0xff0000)
 				embed.set_thumbnail(url="http://clipart-library.com/images/kTMK4787c.jpg")
@@ -224,7 +229,7 @@ class Market(commands.Cog):
 			# Historical Data [Plotfile , Data]
 			try:
 				try:
-					h_data = self.full_graph(full_hisurl, current_prices)
+					h_data = await self.full_graph(full_hisurl, current_prices)
 				except json.decoder.JSONDecodeError:
 					embed = Embed(color=0xff0000)
 					embed.set_thumbnail(url="http://clipart-library.com/images/kTMK4787c.jpg")
@@ -275,47 +280,61 @@ class Market(commands.Cog):
 					'```Error Fetching history, No data in the Albion Data Project directory.\nThis happens because no one has seen this item in the market with the albion data tool installed.``` To help us get more accurate results and more data please check out albion data project and install their client. \nhttps://www.albion-online-data.com/')
 				await ctx.send(embed=support_info)
 
-	def c_price_table(self, currurl):
+	async def c_price_table(self, currurl):
 		'''
 		Generates an ASCII table with current price information
 		:param currurl:
 		:return:
 		'''
 		# Get Data
-		cdata = get_data(currurl)
+		cdata = await get_data(currurl)
 
 		# Table Creation
 		city_table = {}
+		city_buy_order_table = {}
 		for city in self.city_colours:
 			city_table[city] = [nan, nan, nan, nan, nan]
+
+		for city in self.city_colours:
+			city_buy_order_table[city] = [nan, nan, nan, nan, nan]
 
 		for city in cdata:
 			if city['sell_price_min'] == 0:
 				city['sell_price_min'] = nan
 
 			city_table[city['city']][city['quality'] - 1] = city['sell_price_min']
+			city_buy_order_table[city['city']][city['quality'] - 1] = city['buy_price_min']
 
 		# Set up as DataFrame for Processing
 		frame = pd.DataFrame(city_table, index=self.quality_tiers)
+		bframe = pd.DataFrame(city_buy_order_table, index=self.quality_tiers)
 
 		# Remove empty columns and rows
 		frame = frame.dropna(axis=0, how='all')
 		frame = frame.dropna(axis=1, how='all')
 
+		# Buy order
+		bframe = bframe.dropna(axis=0, how='all')
+		bframe = bframe.dropna(axis=1, how='all')
+
 		# Remove Nan and convert number into the game format
 		frame2 = frame.apply(c_game_series, axis=0)
 		frame2 = frame2.fillna('')
 
-		return tabulate(frame, headers="keys", tablefmt="fancy_grid"), frame, frame2
+		# buy orders
+		frame3 = bframe.apply(c_game_series, axis=0)
+		frame3 = frame3.fillna('')
 
-	def full_graph(self, url, current_price_data):
+		return tabulate(frame, headers="keys", tablefmt="fancy_grid"), frame, frame2, frame3
+
+	async def full_graph(self, url, current_price_data):
 		'''
 		Generates an average price history chart and returns history data
 		:param url:
 		:return:
 		'''
 		# Get Data
-		cdata = get_data(url)
+		cdata = await get_data(url)
 
 		# PreProcess Json Data
 		data = {}
