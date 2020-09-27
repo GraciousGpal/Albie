@@ -169,6 +169,7 @@ class Market(commands.Cog):
 		if not id_c:
 			tier, enchant = feature_extraction(item_w)
 			list_v = [s for s in self.dict if s['LocalizedNames'] is not None]
+			list_v = [s for s in list_v if not "NONTRADABLE" in s['UniqueName']] # Remove non tradable items
 			if tier is not None:
 				list_v = [x for x in list_v if f'T{tier[0]}' in x['UniqueName']]
 				item_w = item_w.replace(f'T{tier[0]}', '')
