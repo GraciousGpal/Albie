@@ -248,6 +248,9 @@ class Market(commands.Cog):
 				h_data[0].close()
 				embed.set_image(url=f"attachment://{filename}.png")
 				await ctx.send(file=file, embed=embed)
+				embed2 = Embed(
+					description="឵឵💬 Feedback: [Discord](https://discord.com/oauth2/authorize?client_id=672946568453685248&permissions=256064&scope=bot) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
+				await ctx.send(embed=embed2)
 			else:
 				await ctx.send(embed=embed)
 				await ctx.send(
@@ -352,6 +355,7 @@ class Market(commands.Cog):
 		# Save to Memory
 		buf_p1 = io.BytesIO()
 		plt.savefig(buf_p1, format='png')
+		plt.close()
 		return buf_p1, w_data
 
 	def tier_processing(self, item):
