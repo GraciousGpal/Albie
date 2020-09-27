@@ -169,7 +169,7 @@ class Market(commands.Cog):
 		if not id_c:
 			tier, enchant = feature_extraction(item_w)
 			list_v = [s for s in self.dict if s['LocalizedNames'] is not None]
-			list_v = [s for s in list_v if not "NONTRADABLE" in s['UniqueName']] # Remove non tradable items
+			list_v = [s for s in list_v if not "NONTRADABLE" in s['UniqueName']]  # Remove non tradable items
 			if tier is not None:
 				list_v = [x for x in list_v if f'T{tier[0]}' in x['UniqueName']]
 				item_w = item_w.replace(f'T{tier[0]}', '')
@@ -189,7 +189,15 @@ class Market(commands.Cog):
 			print(item, item_name, full_hisurl)
 			thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
 
-			current_prices = self.c_price_table(currurl)
+			try:
+				current_prices = self.c_price_table(currurl)
+			except json.decoder.JSONDecodeError:
+				embed = Embed(color=0xff0000)
+				embed.set_thumbnail(url="http://clipart-library.com/images/kTMK4787c.jpg")
+				embed.add_field(name="No Information Sent to Albie Bot",
+								value="Looks like the Albion-Data Project didnt send anything to Poor Albie Bot, They might be under heavy load. Try seaching again, if this error persists drop me discord message.",
+								inline=False)
+				await ctx.send(embed=embed)
 
 			# Start embed object
 			title = f"Item Data for {item_f[0][1]['LocalizedNames']['EN-US']} (Enchant:{enchant})\n(ID: {item_f[0][1]['UniqueName']})"
@@ -203,7 +211,6 @@ class Market(commands.Cog):
 			avg_sell_volume = []
 
 			# Current Data
-			# Current Data
 			if len(current_prices[1].index) != 0:
 
 				normalcheck = [str(x) for x in current_prices[1].T]
@@ -216,7 +223,16 @@ class Market(commands.Cog):
 
 			# Historical Data [Plotfile , Data]
 			try:
-				h_data = self.full_graph(full_hisurl, current_prices)
+				try:
+					h_data = self.full_graph(full_hisurl, current_prices)
+				except json.decoder.JSONDecodeError:
+					embed = Embed(color=0xff0000)
+					embed.set_thumbnail(url="http://clipart-library.com/images/kTMK4787c.jpg")
+					embed.add_field(name="No Information Sent to Albie Bot",
+									value="Looks like the Albion-Data Project didnt send anything to Poor Albie Bot, They might be under heavy load. Try seaching again, if this error persists drop me discord message.",
+									inline=False)
+					await ctx.send(embed=embed)
+
 				for city in h_data[1]:
 					avg_price.append(int(h_data[1][city]['avg_price'].mean()))
 					avg_sell_volume.append((city, int(h_data[1][city]['item_count'].mean())))
