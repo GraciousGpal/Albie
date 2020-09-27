@@ -239,6 +239,9 @@ class Market(commands.Cog):
 			embed.set_footer(
 				text=f"Best City Sales : {best_cs_str}\nSuggested Searches: {str([x[1]['LocalizedNames']['EN-US'] for x in item_f[1:4]]).replace('[', '').replace(']', '')}")
 
+			support_info = Embed(
+				description="឵឵💬 Feedback: [Discord](https://discord.com/oauth2/authorize?client_id=672946568453685248&permissions=256064&scope=bot) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
+
 			if h_data[0] is not None:
 				# Upload to discord
 				today = date.today()
@@ -248,13 +251,12 @@ class Market(commands.Cog):
 				h_data[0].close()
 				embed.set_image(url=f"attachment://{filename}.png")
 				await ctx.send(file=file, embed=embed)
-				embed2 = Embed(
-					description="឵឵💬 Feedback: [Discord](https://discord.com/oauth2/authorize?client_id=672946568453685248&permissions=256064&scope=bot) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
-				await ctx.send(embed=embed2)
+				await ctx.send(embed=support_info)
 			else:
 				await ctx.send(embed=embed)
 				await ctx.send(
 					'```Error Fetching history, No data in the Albion Data Project directory.\nThis happens because no one has seen this item in the market with the albion data tool installed.``` To help us get more accurate results and more data please check out albion data project and install their client. \nhttps://www.albion-online-data.com/')
+				await ctx.send(embed=support_info)
 
 	def c_price_table(self, currurl):
 		'''
