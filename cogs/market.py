@@ -241,7 +241,7 @@ class Market(commands.Cog):
 				text=f"Best City Sales : {best_cs_str}\nSuggested Searches: {str([x[1]['LocalizedNames']['EN-US'] for x in item_f[1:4]]).replace('[', '').replace(']', '')}")
 
 			support_info = Embed(
-				description="឵឵💬 Feedback: [Discord](https://discord.com/oauth2/authorize?client_id=672946568453685248&permissions=256064&scope=bot) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
+				description="឵឵💬 Feedback: [Discord](https://discord.gg/RzerS7X) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
 
 			if h_data[0] is not None:
 				# Upload to discord
