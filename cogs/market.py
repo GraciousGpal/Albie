@@ -256,7 +256,7 @@ class Market(commands.Cog):
 				embed.add_field(name="Avg Sell Volume", value=avg_sv, inline=True)
 
 			except Exception as e:
-				print(e)
+				raise e
 
 			embed.set_footer(
 				text=f"Best City Sales : {best_cs_str}\nSuggested Searches: {str([x[1]['LocalizedNames']['EN-US'] for x in item_f[1:4]]).replace('[', '').replace(']', '')}")
@@ -299,6 +299,8 @@ class Market(commands.Cog):
 			city_buy_order_table[city] = [nan, nan, nan, nan, nan]
 
 		for city in cdata:
+			if city['sell_price_min'] == 0:
+				city['sell_price_min'] = nan
 			if city['sell_price_min'] == 0:
 				city['sell_price_min'] = nan
 
@@ -359,13 +361,17 @@ class Market(commands.Cog):
 		sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1',
 					'text.color': '.65', "lines.linewidth": 1})
 
+		no_plots = 0
+
 		if len(w_data) != 0:
-			no_plots = 2
-			fig, ax = plt.subplots(1, no_plots, figsize=(20, 6))
-			a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), ax=ax[0], fmt='',
-							 cbar=False)
-			a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
-			a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
+			fig, ax = plt.subplots(1, figsize=(20, 6))
+			if not current_price_data[2].empty:
+				no_plots = 2
+				fig, ax = plt.subplots(1, no_plots, figsize=(20, 6))
+				a1 = sns.heatmap(current_price_data[1], annot=current_price_data[2].to_numpy(), ax=ax[0], fmt='',
+								 cbar=False)
+				a1.set_xticklabels(a1.get_xticklabels(), rotation=30)
+				a1.set_yticklabels(a1.get_yticklabels(), rotation=0)
 		elif len(current_price_data[1].index) != 0:
 			no_plots = 0
 			fig, ax = plt.subplots(1, figsize=(20, 6))
@@ -380,8 +386,12 @@ class Market(commands.Cog):
 		city_ls = []
 		if len(w_data) != 0:
 			for city in w_data:
-				sns.lineplot(x='timestamp', y='avg_price', color=self.city_colours[city], data=w_data[city],
-							 ax=ax[1])
+				if no_plots == 2:
+					sns.lineplot(x='timestamp', y='avg_price', color=self.city_colours[city], data=w_data[city],
+								 ax=ax[1])
+				else:
+					sns.lineplot(x='timestamp', y='avg_price', color=self.city_colours[city], data=w_data[city],
+								 ax=ax)
 				city_ls.append(city)
 
 			locs, labels = plt.xticks()
