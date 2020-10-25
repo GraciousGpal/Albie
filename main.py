@@ -1,4 +1,3 @@
-import configparser
 import logging
 import os
 
@@ -7,12 +6,8 @@ from discord.ext import commands
 
 # Load config.ini
 currentPath = os.path.dirname(os.path.realpath(__file__))
-configs = configparser.ConfigParser()
-configs.read(currentPath + "/config.ini")
 
-# adminUsers gets to load/unload/reload cogs
-adminUsers = configs["General"]["adminUsers"].replace("'", "").split(", ")
-commandPrefix = configs["General"]["commandPrefix"].replace("'", "").split(", ")
+commandPrefix = '.'
 
 client = commands.Bot(
 	command_prefix=commands.when_mentioned_or(*commandPrefix), case_insensitive=True
@@ -79,7 +74,7 @@ async def extension(ctx, option, extension, hidden=True):
 	"""
 
 	# Check if user is in adminUsers
-	if str(ctx.author) not in adminUsers:
+	if str(ctx.author.id) not in [str(138684247853498369)]:
 		await ctx.send(f"You do not have permission to {option} extensions.")
 		return
 
