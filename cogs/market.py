@@ -256,7 +256,7 @@ class Market(commands.Cog):
 
 		support_info = Embed(color=0x98FB98,
 							 description="឵឵💬 Feedback: [Discord](https://discord.gg/RzerS7X) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
-
+		print(item_w, "...Searching...")
 		try:
 			item_name = item_f[0][1]['UniqueName']
 		except TypeError:
@@ -270,7 +270,7 @@ class Market(commands.Cog):
 			await ctx.send(embed=support_info)
 			return
 		thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
-
+		print(item_w, f"found item {item_name}")
 		async with ctx.channel.typing():
 			# Get all the data
 			current_data, history_data = await asyncio.gather(self.get_current_data(item_name),
