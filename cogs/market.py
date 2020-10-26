@@ -253,7 +253,22 @@ class Market(commands.Cog):
 			id_c = True
 
 		item_f, tier, enchant = self.search_processing(id_c, item_w)
-		item_name = item_f[0][1]['UniqueName']
+
+		support_info = Embed(color=0x98FB98,
+							 description="឵឵💬 Feedback: [Discord](https://discord.gg/RzerS7X) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
+
+		try:
+			item_name = item_f[0][1]['UniqueName']
+		except TypeError:
+			embed = Embed(color=0xff0000)
+			embed.set_thumbnail(url="http://clipart-library.com/images/kTMK4787c.jpg")
+			embed.add_field(name="Item Not Found",
+							value="Looks like the item could not be found ! Try searching again with different spelling."
+								  " If this error persists drop me discord message from the link below.",
+							inline=False)
+			await ctx.send(embed=embed)
+			await ctx.send(embed=support_info)
+			return
 		thumb_url = f"https://render.albiononline.com/v1/item/{item_name}.png?count=1&quality=1"
 
 		async with ctx.channel.typing():
@@ -313,8 +328,6 @@ class Market(commands.Cog):
 					buyorder_embed.add_field(name=f"Avg Current Buy Price ({normalcheck_b[0]})", value=avg_b_cp,
 											 inline=True)
 
-			support_info = Embed(color=0x98FB98,
-								 description="឵឵💬 Feedback: [Discord](https://discord.gg/RzerS7X) | [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/) | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕")
 			filename = f'{item_name.replace("@", "_")}_{datetime.today().strftime("%Y_%m_%d")}'
 
 			if current_buffer is not None:
