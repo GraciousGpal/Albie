@@ -259,8 +259,7 @@ cdef list multi2(item_, str name):
 
 cpdef list item_search(str name, list reduced_ls, list id_list, list full_dict):
 	"""
-	Improved search with better accuracy at the cost of speed,
-	To reduce the speed cost multiple async tasks are used.
+	Improved search with better accuracy
 	:param full_dict:
 	:param id_list:
 	:param name:
@@ -299,8 +298,4 @@ cpdef list item_search(str name, list reduced_ls, list id_list, list full_dict):
 			rating.append(item)
 
 		rating.sort(key=sort_sim, reverse=True)
-		most_likely_lang = rating[0][2]
-
-		for nolang in [x for x in rating if x[2] is None]:
-			nolang[2] = most_likely_lang
 		return rating[0:5]

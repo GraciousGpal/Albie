@@ -178,9 +178,9 @@ def last_updated(date_):
 		('d', 60 * 60 * 24),
 		('h', 60 * 60),
 		('min', 60),
-		('sec', 1)
+		('s', 1)
 	]
-	time_ = {'y': 0, 'm': 0, 'd': 0, 'h': 0, 'min': 0, 'sec': 0}
+	time_ = {'y': 0, 'm': 0, 'd': 0, 'h': 0, 'min': 0, 's': 0}
 	for period_name, period_seconds in periods:
 		if seconds > period_seconds:
 			period_value, seconds = divmod(seconds, period_seconds)
@@ -193,8 +193,11 @@ def last_updated(date_):
 			if index == 2:
 				return lis  # + 'ago'
 			index += 1
-			lis += f'{time_[key]}{key} '
-			if key == 'sec':
+			if key == 'min':
+				lis += f'{time_[key]}m '
+			else:
+				lis += f'{time_[key]}{key} '
+			if key == 's':
 				return lis
 
 
@@ -479,8 +482,7 @@ class Market(commands.Cog):
 		return sell_data, sell_annotation, buy_data, buy_annotation
 
 	async def create_sell_buy_order(self, current_data):
-		sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1', 'text.color': '.65',
-					"lines.linewidth": 1})
+		sns.set(rc={'axes.facecolor': 'black', 'axes.grid': True, 'grid.color': '.1', 'text.color': '.65'})
 
 		if current_data[0].empty and current_data[2].empty:
 			return None
