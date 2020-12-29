@@ -1,9 +1,9 @@
 import asyncio
+import datetime
 import io
 import json
 import logging
 import math
-from datetime import datetime
 from functools import wraps
 from time import time
 from timeit import default_timer as timer
@@ -169,8 +169,8 @@ def last_updated(date_):
 	"""
 	if date_ == '':
 		return ''
-	d1 = datetime.today()
-	td_object = d1 - datetime.strptime(date_, '%Y-%m-%dT%H:%M:%S')
+	d1 = datetime.datetime.today()
+	td_object = d1 - datetime.datetime.strptime(date_, '%Y-%m-%dT%H:%M:%S')
 	seconds = int(td_object.total_seconds())
 	periods = [
 		('y', 60 * 60 * 24 * 365),
@@ -381,8 +381,10 @@ class Market(commands.Cog):
 			return None
 
 	async def get_history_data(self, item_name):
+		date_6months_ago = (datetime.date.today() - datetime.timedelta(3 * 365 / 12)).strftime("%m-%d-%Y")
+		todays_date = datetime.date.today().strftime("%m-%d-%Y")
 		try:
-			full_hisurl = self.base_url + item_name + '?date=1-1-2020&locations=' + f"{self.locations[0]}" + "".join(
+			full_hisurl = self.base_url + item_name + f"?date={date_6months_ago}&end_date={todays_date}&locations=" + f"{self.locations[0]}" + "".join(
 				["," + "".join(x) for x in self.locations if
 				 x != self.locations[0]]) + f"&time-scale={self.scale}"
 			return await get_data(full_hisurl)
@@ -567,7 +569,7 @@ class Market(commands.Cog):
 				city_ls.append(city)
 
 			locs, labels = plt.xticks()
-			plt.title('Average Item Price')
+			plt.title('Average Item Price (Past 3 Months)')
 			plt.ylabel('')
 			plt.setp(labels, rotation=20)
 			plt.legend(labels=city_ls)
