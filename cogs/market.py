@@ -331,7 +331,7 @@ class Market(commands.Cog):
 					buyorder_embed.add_field(name=f"Avg Current Buy Price ({normalcheck_b[0]})", value=avg_b_cp,
 											 inline=True)
 
-			filename = f'{item_name.replace("@", "_")}_{datetime.today().strftime("%Y_%m_%d")}'
+			filename = f'{item_name.replace("@", "_")}_{datetime.datetime.today().strftime("%Y_%m_%d")}'
 
 			if current_buffer is not None:
 				current_buffer.seek(0)
