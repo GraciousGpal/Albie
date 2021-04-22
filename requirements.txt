@@ -1,14 +1,5 @@
-flask~=1.1.2
-matplotlib~=3.3.0
-numpy~=1.19.1
-pandas~=1.1.0
-aiohttp
-seaborn~=0.10.1
-tabulate~=0.8.7
-jellyfish~=0.8.2
-fuzzywuzzy~=0.18.0
-
-beautifulsoup4~=4.9.1
 discord.py
+aiohttp
+seaborn
 python-Levenshtein
 cython

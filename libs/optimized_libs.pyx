@@ -1,6 +1,7 @@
 import functools
 import re
 import sys
+from collections import defaultdict
 
 from Levenshtein import *
 
@@ -251,11 +252,17 @@ cdef float partial_token_set_ratio(str s1, str s2, force_ascii=True, full_proces
 cdef float sort_sim(val):
 	return val[0]
 
-cdef list multi(item_, str name):
-	return [token_set_ratio(item_['UniqueName'].lower(), name.lower()), item_, None]
+cpdef list multi(item_, str name):
+	return [token_set_ratio(item_['UniqueName'].lower(), name.lower()), item_, None, item_['UniqueName'].lower()]
 
 cdef list multi2(item_, str name):
 	return [token_set_ratio(item_[0], name.lower()), item_[1], None]
+
+cpdef list distance_algorithm(item_, str name):
+	return [token_set_ratio(item_[0], name.lower()), item_[1], None, item_[0]]
+
+cpdef float simple_distance_algorithm(item_, str name):
+	return token_set_ratio(item_, name)
 
 cpdef list item_search(str name, list reduced_ls, list id_list, list full_dict):
 	"""
@@ -279,7 +286,7 @@ cpdef list item_search(str name, list reduced_ls, list id_list, list full_dict):
 
 	if name in id_list:
 		for item_v3 in full_dict:
-			if item_v3['UniqueName'] == name:
+			if item_v3['UniqueName'].lower() == name.lower():
 				ls_r.append((11, item_v3))
 		return ls_r
 
@@ -292,10 +299,62 @@ cpdef list item_search(str name, list reduced_ls, list id_list, list full_dict):
 				list_v2.append([item_v2['LocalizedNames'][language].lower(), item_v2])
 
 		for term_v2 in list_v2:
-			rating2.append(multi2(term_v2, name=name))
+			rating2.append(distance_algorithm(term_v2, name=name))
 
 		for item in rating2:
 			rating.append(item)
 
+		# Add Word Weights to the score.
+		for word in name.split():
+			for item_name in rating:
+				if word.lower() in item_name[3].lower():
+					item_name[0] += 0.1
+
 		rating.sort(key=sort_sim, reverse=True)
 		return rating[0:5]
+
+cpdef _check_type(s):
+	if not isinstance(s, str):
+		raise TypeError("expected str or unicode, got %s" % type(s).__name__)
+
+cpdef int damerau_levenshtein_distance(str s1, str s2):
+	_check_type(s1)
+	_check_type(s2)
+
+	len1 = len(s1)
+	len2 = len(s2)
+	infinite = len1 + len2
+
+	# character array
+	da = defaultdict(int)
+
+	# distance matrix
+	score = [[0] * (len2 + 2) for x in range(len1 + 2)]
+
+	score[0][0] = infinite
+	for i in range(0, len1 + 1):
+		score[i + 1][0] = infinite
+		score[i + 1][1] = i
+	for i in range(0, len2 + 1):
+		score[0][i + 1] = infinite
+		score[1][i + 1] = i
+
+	for i in range(1, len1 + 1):
+		db = 0
+		for j in range(1, len2 + 1):
+			i1 = da[s2[j - 1]]
+			j1 = db
+			cost = 1
+			if s1[i - 1] == s2[j - 1]:
+				cost = 0
+				db = j
+
+			score[i + 1][j + 1] = min(
+				score[i][j] + cost,
+				score[i + 1][j] + 1,
+				score[i][j + 1] + 1,
+				score[i1][j1] + (i - i1 - 1) + 1 + (j - j1 - 1),
+			)
+		da[s1[i - 1]] = i
+
+	return score[len1 + 1][len2 + 1]

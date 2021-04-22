@@ -1,6 +1,7 @@
 .idea
 *.log
 __pycache__
+test.py
 env
 *.pyc
 keys.json
