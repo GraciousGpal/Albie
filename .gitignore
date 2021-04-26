@@ -1,5 +1,8 @@
 .idea
 *.log
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
 __pycache__
 test.py
 env

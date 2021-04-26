@@ -7,7 +7,7 @@ from discord.ext import commands
 # Load config.ini
 current_path = os.path.dirname(os.path.realpath(__file__))
 
-command_prefix = '+'  # TODO revert back to .
+command_prefix = '+'  # TODO revert back to . for production
 
 client = commands.Bot(
     command_prefix=commands.when_mentioned_or(*command_prefix), case_insensitive=True
@@ -51,7 +51,7 @@ async def on_ready():
         print(e)
 
     # Activity to 'Ready'
-    await client.change_presence(activity=Game("Ready"))
+    await client.change_presence(activity=Game("Albion Online"))
 
     # Login message in console
     print(f"Logged in as {client.user}.\nConnected to:")
@@ -93,8 +93,8 @@ async def extension(ctx, option, extension):
             )
             return
 
-    except Exception:
-        await ctx.send(f"{extension} extension {option} FAILED.")
+    except Exception as e:
+        await ctx.send(f"{extension} extension {option} FAILED.:\n```{e}```")
         return
 
     # Success message

@@ -370,9 +370,9 @@ def load_crafting_data(data_url):
     data = download_file_with_fallback(data_url, "data/items_crafting.json")
     for category in data["items"]:
         if category in (
-                "shopcategories",
-                "@xmlns:xsi",
-                "@xsi:noNamespaceSchemaLocation",
+            "shopcategories",
+            "@xmlns:xsi",
+            "@xsi:noNamespaceSchemaLocation",
         ):
             continue
         if isinstance(data["items"][category], list):
@@ -421,11 +421,11 @@ def load_language_list_ls(item_dictionary):
 async def get_current_data(item_name):
     try:
         currurl = (
-                BASE_URL_CURRENT
-                + item_name
-                + "?locations="
-                + f"{LOCATIONS[0]}"
-                + "".join(["," + "".join(x) for x in LOCATIONS if x != LOCATIONS[0]])
+            BASE_URL_CURRENT
+            + item_name
+            + "?locations="
+            + f"{LOCATIONS[0]}"
+            + "".join(["," + "".join(x) for x in LOCATIONS if x != LOCATIONS[0]])
         )
         return await get_data(currurl)
     except Exception as e:
@@ -435,17 +435,17 @@ async def get_current_data(item_name):
 
 async def get_history_data(item_name, scale=6):
     date_months_ago = (
-            datetime.date.today() - datetime.timedelta(6 * 365 / 12)
+        datetime.date.today() - datetime.timedelta(6 * 365 / 12)
     ).strftime("%m-%d-%Y")
     todays_date = datetime.date.today().strftime("%m-%d-%Y")
     try:
         full_hisurl = (
-                BASE_URL_HISTORY
-                + item_name
-                + f"?date={date_months_ago}&end_date={todays_date}&locations="
-                + f"{LOCATIONS[0]}"
-                + "".join(["," + "".join(x) for x in LOCATIONS if x != LOCATIONS[0]])
-                + f"&time-scale={scale}"
+            BASE_URL_HISTORY
+            + item_name
+            + f"?date={date_months_ago}&end_date={todays_date}&locations="
+            + f"{LOCATIONS[0]}"
+            + "".join(["," + "".join(x) for x in LOCATIONS if x != LOCATIONS[0]])
+            + f"&time-scale={scale}"
         )
         return await get_data(full_hisurl)
     except Exception as e:
