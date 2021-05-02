@@ -9,7 +9,7 @@ env
 *.pyc
 keys.json
 decom
-libs/setup.py
+libs/complied_libs/setup.py
 data.zip
 venv
 *.db

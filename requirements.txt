@@ -3,3 +3,8 @@ aiohttp
 seaborn
 python-Levenshtein
 cython
+matplotlib
+pandas
+discord
+numpy
+jellyfish

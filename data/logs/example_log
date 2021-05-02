@@ -1,0 +1,2 @@
+2021-05-02 17:26:15,727:INFO:discord.client: logging in using static token
+2021-05-02 17:26:17,475:INFO:discord.gateway: Shard ID None has sent the IDENTIFY payload.

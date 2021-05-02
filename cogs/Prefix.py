@@ -1,6 +1,11 @@
-from discord.ext import commands
+import logging
+
 from discord import Embed
+from discord.ext import commands
+
 from libs.db import create_connection
+
+log = logging.getLogger(__name__)
 
 
 def is_guild_owner():
@@ -74,7 +79,7 @@ class Prefix(commands.Cog):
             c = self.sqlite_prefix.cursor()
             c.execute(sql_c)
         except Exception as e:
-            print(e)
+            log.error(e)
         finally:
             self.sqlite_prefix.commit()
             c.close()
@@ -98,7 +103,7 @@ class Prefix(commands.Cog):
                 (int(server_id), prefix),
             )
         except Exception as e:
-            print(e)
+            log.error(e)
         finally:
             self.sqlite_prefix.commit()
             c.close()
@@ -109,14 +114,14 @@ def setup(client):
 
 
 def teardown(client):
-    print("Unloading Prefix...")
+    log.info("Unloading Prefix...")
     client.command_prefix = commands.when_mentioned_or(*".")
 
 
 if __name__ == "__main__":
     # Quick Testing.
     p = Prefix("blank")
-    print("WRITING 99000 ", p.write(99000, "+"))
+    log.info("WRITING 99000 ", p.write(99000, "+"))
     assert None is p.write(99000, "+")
-    print("GETTING 99000 ", p.get(99000))
+    log.info("GETTING 99000 ", p.get(99000))
     assert p.get(99000) == "+"

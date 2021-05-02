@@ -14,16 +14,15 @@ client = commands.Bot(
 )
 
 # Set up logging to discord.log
-logger = logging.getLogger("discord")
-logger.setLevel(logging.INFO)
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
-handler.setFormatter(
-    logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
-)
-logger.addHandler(handler)
-
-
-# keep_alive.keep_alive()
+logFormatter = logging.Formatter("%(asctime)s [%(threadName)s] [%(levelname)s]  %(message)s")
+log = logging.getLogger("discord")
+log.setLevel(logging.INFO)
+file_handler = logging.FileHandler(filename="data/logs/discord.log", encoding="utf-8", mode="w")
+log.addHandler(file_handler)
+# Set up logging to Console
+consoleHandler = logging.StreamHandler()
+consoleHandler.setFormatter(logFormatter)
+log.addHandler(consoleHandler)
 
 
 @client.event
@@ -44,23 +43,22 @@ async def on_ready():
     try:
         for filename in os.listdir(current_path + "/cogs"):
             if filename.endswith(".py"):
-                print(f"Loading...{filename[:-3]}")
                 client.load_extension(f"cogs.{filename[:-3]}")
-                print(f"Loaded {filename[:-3]}")
+                log.info(f"Loaded: [{filename[:-3]}]")
     except Exception as e:
-        print(e)
+        log.error(e)
 
     # Activity to 'Ready'
     await client.change_presence(activity=Game("Albion Online"))
 
     # Login message in console
-    print(f"Logged in as {client.user}.\nConnected to:")
+    log.info(f"Logged in as {client.user}.\nConnected to:")
     for (i, guild) in enumerate(client.guilds):
 
         # Only list up to 10 guilds
-        print(guild.name)
+        log.info(guild.name)
         if i == 9:
-            print(f"and {len(client.guilds) - 10} other guilds.")
+            log.info(f"and {len(client.guilds) - 10} other guilds.")
             break
 
 
@@ -102,5 +100,5 @@ async def extension(ctx, option, extension):
 
 
 # Copy from your Discord developer portal
-token =  os.environ['DISCORDAPI_A']
+token = os.environ['DISCORDAPI_A']
 client.run(token)
