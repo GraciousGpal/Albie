@@ -75,10 +75,17 @@ class Crafting(commands.Cog):
         )
 
     @commands.command(aliases=["c"])
-    async def craft(self, ctx, amount=1, *, item=None):
+    async def craft(self, ctx, amount, *, item=None):
         """
         Calculate the estimated cost of crafting a certain amount of items.
         """
+        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        if not str(amount).isdigit():
+            await ctx.send(
+                "Please enter an object to be searched:\n e.g  ```.c 10 Minor Healing Potion\n.c <amount> <item> ```"
+            )
+            return
+        amount = abs(int(amount))
         if item is None:
             await ctx.send(
                 "Please enter an object to be searched:\n e.g  ```.c 10 Minor Healing Potion\n.c <amount> <item> ```"
@@ -97,6 +104,7 @@ class Crafting(commands.Cog):
                 items_needed = self.craft_data[item.matched]
             except KeyError:
                 await ctx.send("This Item is not supported")
+                return
             if isinstance(items_needed["craft_requirements"], dict):
                 items_needed["craft_requirements"] = [
                     items_needed["craft_requirements"]

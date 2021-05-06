@@ -90,9 +90,10 @@ def get_avg_stats(h_data):
     # Initiate Avg price variables
     avg_price = []
     avg_sell_volume = []
-    for city in h_data:
-        avg_price.append(int(h_data[city]["avg_price"].mean()))
-        avg_sell_volume.append((city, int(h_data[city]["item_count"].mean())))
+    if len(h_data) != 0:
+        for city in h_data:
+            avg_price.append(int(h_data[city]["avg_price"].mean()))
+            avg_sell_volume.append((city, int(h_data[city]["item_count"].mean())))
 
     avg_p = c_game_currency(int(average(avg_price)))
     avg_sv = c_game_currency(int(average([x[1] for x in avg_sell_volume])))
@@ -245,7 +246,7 @@ def process_history_data(history_data):
         data[city].timestamp = pd.to_datetime(data[city].timestamp)
 
     if len(data) == 0:
-        return None, {}
+        return {}
 
     # Removing Outliers
     w_data = data.copy()
@@ -291,21 +292,22 @@ async def full_graph(cdata):
     # Plotting avg_prices --------------------
     # ax.patch.set_facecolor('black')
     city_ls = []
-    if len(w_data) != 0:
-        for city in w_data:
-            sns.lineplot(
-                x="timestamp",
-                y="avg_price",
-                color=CITY_COLOURS[city],
-                data=w_data[city],
-            )
-            city_ls.append(city)
+    if w_data is not None:
+        if len(w_data) != 0:
+            for city in w_data:
+                sns.lineplot(
+                    x="timestamp",
+                    y="avg_price",
+                    color=CITY_COLOURS[city],
+                    data=w_data[city],
+                )
+                city_ls.append(city)
 
-        locs, labels = plt.xticks()
-        plt.title("Average Item Price")
-        plt.ylabel("")
-        plt.setp(labels, rotation=20)
-        plt.legend(labels=city_ls)
+            locs, labels = plt.xticks()
+            plt.title("Average Item Price")
+            plt.ylabel("")
+            plt.setp(labels, rotation=20)
+            plt.legend(labels=city_ls)
 
     labels = [c_game_currency(x) for x in plt.yticks()[0]]
 
@@ -424,6 +426,7 @@ class Market(commands.Cog):
         Gets the price of an item and its history (text format)
         Example usage: .p t6.1 hunter hood or .price t4  hide
         """
+        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
         if item is None:
             await ctx.send(
                 "Please enter an object to be searched:\n e.g  ```.p t6.1 hunter hood\n.price t4 hide ```"
@@ -470,16 +473,19 @@ class Market(commands.Cog):
                     text += f"[{quality[0]}]: `{int(value)}` {updated}\n"
                 buyorder_embed.add_field(name=city, value=text, inline=True)
                 text = ""
+
             avg_s, avg_b, n_s, n_b = get_current_average_s(current_prices)
-            history_data = process_history_data(item.price_history)
-            avg_p, avg_sv, best_cs = get_avg_stats(history_data)
             buyorder_embed.add_field(name='Averages:',
                                      value=f"Sell Orders({n_s[0][0]}):`{str(avg_s)}`\nBuy Orders({n_b[0][0]}):`{str(avg_b)}`",
                                      inline=False)
-            buyorder_embed.add_field(name='Historical Averages:',
-                                     value=f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`\nSell Volume({n_b[0][0]}):"
-                                           f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
-                                     inline=False)
+
+            history_data = process_history_data(item.price_history)
+            if history_data is not None:
+                avg_p, avg_sv, best_cs = get_avg_stats(history_data)
+                buyorder_embed.add_field(name='Historical Averages:',
+                                         value=f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`\nSell Volume({n_b[0][0]}):"
+                                               f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
+                                         inline=False)
             await ctx.send(embed=buyorder_embed)
             await ctx.send(embed=support_info)
 
@@ -492,6 +498,7 @@ class Market(commands.Cog):
         :param item_i:
         :return:
         """
+        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
         if item_i is None:
             await ctx.send(
                 "Please enter an object to be searched:\n e.g  ```.p t6.1 hunter hood\n.price t4 hide ```"
@@ -589,7 +596,7 @@ class Market(commands.Cog):
                 buyorder_embed.colour = 0xFF0000
 
             history_embed = Embed(color=0x98FB98)
-            if history_buffer is not None:
+            if history_buffer is not None and h_data:
                 history_buffer.seek(0)
                 history_file = File(history_buffer, filename=f"{filename}H.png")
                 history_buffer.close()
@@ -613,7 +620,7 @@ class Market(commands.Cog):
                 await ctx.send(embed=buyorder_embed)
 
             stop_measuring_time = round(time() - start_measuring_time, 1)
-            if history_buffer is None:
+            if history_buffer is None or not h_data:
                 history_embed.colour = 0xFF0000
                 history_embed.description = "No History Data available!"
                 history_embed.set_footer(

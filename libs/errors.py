@@ -33,3 +33,27 @@ class ItemNotFound(Exception):
     async def send_discord_msg(self):
         await self.ctx.send(embed=self.embed)
         await self.ctx.send(embed=support_info)
+
+
+class NoHistoryDataAvailable(Exception):
+    """
+    Looks like there is no History data available for this Item.
+    If this error persists drop me discord message from the link below.
+    """
+
+    def __init__(self, ctx):
+        self.embed = Embed(color=0xff0000)
+        self.ctx = ctx
+        self.embed.colour = 0xFF0000
+        self.embed.add_field(name="No History Data Available !",
+                             value="Looks like there is no History data available for this Item,"
+                                   " Consider contributing to the albion data client project,"
+                                   " buy downloading their client and running it while you play the game."
+                                   " It uploads all item prices for everyone to use when you browse the marketplace.",
+                             inline=False)
+        self.loop = asyncio.get_running_loop()
+        self.loop.create_task(self.send_discord_msg())
+
+    async def send_discord_msg(self):
+        await self.ctx.send(embed=self.embed)
+        await self.ctx.send(embed=support_info)

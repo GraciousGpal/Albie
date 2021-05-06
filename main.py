@@ -14,8 +14,8 @@ client = commands.AutoShardedBot(
 )
 
 # Set up logging to discord.log
-logFormatter = logging.Formatter("%(asctime)s [%(threadName)s] [%(levelname)s]  %(message)s")
-log = logging.getLogger("discord")
+logFormatter = logging.Formatter("%(asctime)s [%(name)s] [%(levelname)s]  %(message)s")
+log = logging.getLogger()
 log.setLevel(logging.INFO)
 file_handler = logging.FileHandler(filename="data/logs/discord.log", encoding="utf-8", mode="w")
 log.addHandler(file_handler)

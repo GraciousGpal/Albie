@@ -34,8 +34,12 @@ class Prefix(commands.Cog):
         Args:
             prefix ([string]): [The Prefix the bot is called with]
         """
+        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        if ctx.guild is not None:
+            pref = self.get(ctx.guild.id)
+        else:
+            pref = self.get(ctx.channel.id)
 
-        pref = self.get(ctx.guild.id)
         pref = pref if pref is not None else "."
 
         if prefix.isnumeric():
@@ -67,7 +71,10 @@ class Prefix(commands.Cog):
             await ctx.send(embed=embed)
 
     def get_prefix(self, ctx, message):  ##first we define get_prefix
-        pref = self.get(message.guild.id)
+        if message.guild is not None:
+            pref = self.get(message.guild.id)
+        else:
+            pref = self.get(message.channel.id)
         return pref if pref is not None else "."
 
     def connect(self):
