@@ -100,5 +100,5 @@ async def extension(ctx, option, extension):
 
 
 # Copy from your Discord developer portal
-token = os.environ['DISCORDAPI_A']
+token = os.environ['DISCORDAPI']
 client.run(token)
