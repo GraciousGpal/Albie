@@ -142,8 +142,8 @@ class Crafting(commands.Cog):
                     cost = round(item_meta[item_id_][location]["avg_price"])
                     total_cost = cost * item_amount
                     location_p[location] = total_cost
-                    text += f"{location}: {c_game_currency(cost)} Volume Sold:\
-                     {c_game_currency(round(item_meta[item_id_][location]['volume'], 1))} Total Cost: {c_game_currency(total_cost)}\n"
+                    text += f"{location}: `{c_game_currency(cost)}` Volume Sold:\
+                     {c_game_currency(round(item_meta[item_id_][location]['volume'], 1))} Total Cost: `{c_game_currency(total_cost)}`\n"
                 embed.add_field(
                     name=self.op_dict[ingre["@uniquename"]]["LocalizedNames"]["EN-US"],
                     value=text,
@@ -155,7 +155,7 @@ class Crafting(commands.Cog):
                 )
                 total += cheapest_location[0]
                 text2 += f"**{self.op_dict[ingre['@uniquename']]['LocalizedNames']['EN-US']} x{item_amount}**\n \
-                Cheapest location: {cheapest_location[1]} Price: {c_game_currency(round(cheapest_location[0]))}\n"
+                Cheapest location: {cheapest_location[1]} Price: `{c_game_currency(round(cheapest_location[0]))}`\n"
             text2 += (
                 f"\n ***Total Silver Cost***: ```py\n{c_game_currency(round(total))}```"
             )
