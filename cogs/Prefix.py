@@ -34,7 +34,10 @@ class Prefix(commands.Cog):
         Args:
             prefix ([string]): [The Prefix the bot is called with]
         """
-        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        try:
+            log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        except TypeError:
+            pass
         if ctx.guild is not None:
             pref = self.get(ctx.guild.id)
         else:

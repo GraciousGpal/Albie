@@ -426,7 +426,10 @@ class Market(commands.Cog):
         Gets the price of an item and its history (text format)
         Example usage: .p t6.1 hunter hood or .price t4  hide
         """
-        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        try:
+            log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        except TypeError:
+            pass
         if item is None:
             await ctx.send(
                 "Please enter an object to be searched:\n e.g  ```.p t6.1 hunter hood\n.price t4 hide ```"
@@ -498,7 +501,10 @@ class Market(commands.Cog):
         :param item_i:
         :return:
         """
-        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        try:
+            log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        except TypeError:
+            pass
         if item_i is None:
             await ctx.send(
                 "Please enter an object to be searched:\n e.g  ```.p t6.1 hunter hood\n.price t4 hide ```"

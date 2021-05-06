@@ -79,7 +79,10 @@ class Crafting(commands.Cog):
         """
         Calculate the estimated cost of crafting a certain amount of items.
         """
-        log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        try:
+            log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+        except TypeError:
+            pass
         if not str(amount).isdigit():
             await ctx.send(
                 "Please enter an object to be searched:\n e.g  ```.c 10 Minor Healing Potion\n.c <amount> <item> ```"
