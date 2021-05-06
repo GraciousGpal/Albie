@@ -1,8 +1,24 @@
 import logging
-
-from libs.complied_libs.optimized_libs import simple_distance_algorithm
+import os
+import sys
 
 log = logging.getLogger(__name__)
+
+# This section of the code ensures that the cython module is automatically compiled on the platform it is deployed on.
+try:
+    from libs.compiled_libs.search_algo import simple_distance_algorithm
+except ModuleNotFoundError:
+    version = sys.version_info
+    try:
+        cmd = f"cd libs//compiled_libs && python{version.major}.{version.minor} setup.py build_ext --inplace"
+        stream = os.popen(cmd)
+        output = stream.read()
+        if output == "":
+            raise Exception(f'Python Version {version.major}.{version.minor} not found')
+    except Exception:
+        stream = os.popen("cd libs//compiled_libs// && python setup.py build_ext --inplace")
+        output = stream.read()
+        log.warning(output)
 
 
 def get_tier(string):
@@ -76,7 +92,8 @@ def jw_search(name: str, item_score, language_list):
 
     # ID CHECK
     if name in item_score:
-        return {name: 100}
+        tier, enchant = feature_extraction(name)
+        return {"suggestions": [(name, 100)], "tier": tier, "enchant": enchant}
 
     # tier and enchant detection
     tier, enchant = feature_extraction(name)

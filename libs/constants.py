@@ -1,3 +1,4 @@
+from discord import Embed
 # ------- PACKAGE CONSTANTS ------- #
 
 
@@ -44,3 +45,11 @@ CITY_COLOURS = {
     "Merlyns Rest": "lawngreen",
     "Morganas Rest": "midnightblue",
 }
+
+
+support_info = Embed(
+    color=0x98FB98,
+    description="឵឵💬 Feedback: [Discord](https://discord.gg/RzerS7X) | \
+        [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/)\
+                | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕",
+)

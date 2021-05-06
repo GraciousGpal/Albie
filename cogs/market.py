@@ -13,21 +13,15 @@ import pandas as pd
 import seaborn as sns
 from discord import Embed, File
 from discord.ext import commands
-from numpy import nan
+from numpy import nan, isnan
 
-from libs.constants import CITY_COLOURS, QUALITY_TIERS
+from libs.constants import CITY_COLOURS, QUALITY_TIERS, support_info
+from libs.errors import NoInfoSentToAlbie, ItemNotFound
 from libs.item_handler import Item, load_optimized_data, load_language_list_ls
 from libs.utils import c_game_currency
 
 log = logging.getLogger(__name__)
 session = aiohttp.ClientSession()
-
-support_info = Embed(
-    color=0x98FB98,
-    description="឵឵💬 Feedback: [Discord](https://discord.gg/RzerS7X) | \
-        [Albion Forums](https://forum.albiononline.com/index.php/Thread/135629-RELEASE-Albie-An-Dedicated-Discord-Bot-For-Albion/)\
-                | Support: [Buy me a Coffee](https://ko-fi.com/gracious) ☕",
-)
 
 
 # -------------------------------- #
@@ -150,13 +144,6 @@ def last_updated(date_):
     return ""
 
 
-class NoInfoSentToAlbie(Exception):
-    """
-    Looks like the Albion-Data Project didnt send anything to Poor Albie Bot, They might be under heavy load.
-    Try searching again, if this error persists drop me discord message.
-    """
-
-
 async def c_price_table(cdata):
     """
     Generates an ASCII table with current price information
@@ -248,15 +235,10 @@ async def c_price_table(cdata):
     return sell_data, sell_annotation, buy_data, buy_annotation
 
 
-async def full_graph(cdata):
-    """
-    Generates an average price history chart and returns history data
-    :param cdata:
-    :return:
-    """
+def process_history_data(history_data):
     # PreProcess Json Data
     data = {}
-    for city_obj in cdata:
+    for city_obj in history_data:
         data[city_obj["location"]] = pd.DataFrame(city_obj["data"])
 
     for city in data:
@@ -284,6 +266,17 @@ async def full_graph(cdata):
     # if no data left, just show the points
     if len(w_data) == 0:
         w_data = data
+    return data
+
+
+async def full_graph(cdata):
+    """
+    Generates an average price history chart and returns history data
+    :param cdata:
+    :return:
+    """
+    # PreProcess Json Data
+    w_data = process_history_data(cdata)
 
     sns.set(
         rc={
@@ -384,6 +377,34 @@ async def create_sell_buy_order(current_data):
     return current_order_buffer
 
 
+def get_current_average_s(current_prices):
+    # Current Data
+    avg_s_cp = None
+    avg_b_cp = None
+    normalcheck_s = None
+    normalcheck_b = None
+    if len(current_prices[0].index) != 0:
+
+        normalcheck_s = [str(x) for x in current_prices[0].T]
+        if len(normalcheck_s) != 0:
+            avg_s_current_price = [
+                x
+                for x in current_prices[0].loc[normalcheck_s[0], :]
+                if not math.isnan(x)
+            ]
+            avg_s_cp = int(average(avg_s_current_price))
+    if len(current_prices[2].index) != 0:
+        normalcheck_b = [str(x) for x in current_prices[2].T]
+        if "Normal" in normalcheck_b:
+            avg_b_current_price = [
+                x
+                for x in current_prices[2].loc[normalcheck_b[0], :]
+                if not math.isnan(x)
+            ]
+            avg_b_cp = int(average(avg_b_current_price))
+    return avg_s_cp, avg_b_cp, normalcheck_s, normalcheck_b
+
+
 class Market(commands.Cog):
     def __init__(self, client):
         self.client = client
@@ -417,7 +438,50 @@ class Market(commands.Cog):
             except json.decoder.JSONDecodeError:
                 raise NoInfoSentToAlbie
             thumb_url = f"https://render.albiononline.com/v1/item/{item.matched}.png?count=1&quality=1"
-            pass
+            # Start embed object
+            title = f"{item.name} (Enchant:{item.enchant})\n"
+            buyorder_embed = Embed(
+                color=0x98FB98,
+                title=title,
+                url=f"https://www.albiononline2d.com/en/item/id/{item.matched}",
+            )
+            text = ''
+            buyorder_embed.set_thumbnail(url=thumb_url)
+            buyorder_embed.add_field(name='Sell Orders:', value='======', inline=False)
+            for city, city_u in zip(current_prices[0], current_prices[1]):
+                for quality in current_prices[0][city].index:
+                    value = current_prices[0][city][quality]
+                    if isnan(value):
+                        continue
+                    updated_ss = current_prices[1][city_u][quality]
+                    updated = updated_ss.split('\n')[1]
+                    text += f"[{quality[0]}]: `{int(value)}` {updated}\n"
+                buyorder_embed.add_field(name=city, value=text, inline=True)
+                text = ""
+
+            buyorder_embed.add_field(name='Buy Orders:', value='======', inline=False)
+            for city, city_u in zip(current_prices[2], current_prices[3]):
+                for quality in current_prices[2][city].index:
+                    value = current_prices[2][city][quality]
+                    if isnan(value):
+                        continue
+                    updated_s = current_prices[3][city_u][quality]
+                    updated = updated_s.split('\n')[1]
+                    text += f"[{quality[0]}]: `{int(value)}` {updated}\n"
+                buyorder_embed.add_field(name=city, value=text, inline=True)
+                text = ""
+            avg_s, avg_b, n_s, n_b = get_current_average_s(current_prices)
+            history_data = process_history_data(item.price_history)
+            avg_p, avg_sv, best_cs = get_avg_stats(history_data)
+            buyorder_embed.add_field(name='Averages:',
+                                     value=f"Sell Orders({n_s[0][0]}):`{str(avg_s)}`\nBuy Orders({n_b[0][0]}):`{str(avg_b)}`",
+                                     inline=False)
+            buyorder_embed.add_field(name='Historical Averages:',
+                                     value=f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`\nSell Volume({n_b[0][0]}):"
+                                           f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
+                                     inline=False)
+            await ctx.send(embed=buyorder_embed)
+            await ctx.send(embed=support_info)
 
     @commands.command(aliases=["price", "p"])
     async def prices(self, ctx, *, item_i=None):
@@ -438,8 +502,10 @@ class Market(commands.Cog):
         async with ctx.channel.typing():
             item.get_matches()
             await item.get_data()
+            if item.matched is None:
+                raise ItemNotFound(ctx)
             thumb_url = f"https://render.albiononline.com/v1/item/{item.matched}.png?count=1&quality=1"
-            print(item_i, item.matched, item.name, "...matched...")
+            log.info(item_i, item.matched, item.name, "...matched...")
             try:
                 current_prices = await c_price_table(item.current_prices)
             except json.decoder.JSONDecodeError:
@@ -494,36 +560,22 @@ class Market(commands.Cog):
             buyorder_embed.set_thumbnail(url=thumb_url)
 
             # Current Data
-            if len(current_prices[0].index) != 0:
-
-                normalcheck_s = [str(x) for x in current_prices[0].T]
-                if len(normalcheck_s) != 0:
-                    avg_s_current_price = [
-                        x
-                        for x in current_prices[0].loc[normalcheck_s[0], :]
-                        if not math.isnan(x)
-                    ]
-                    avg_s_cp = c_game_currency(int(average(avg_s_current_price)))
-                    buyorder_embed.add_field(
-                        name=f"Avg Current Sell Price ({normalcheck_s[0]})",
-                        value=avg_s_cp,
-                        inline=True,
-                    )
-
-            if len(current_prices[2].index) != 0:
-                normalcheck_b = [str(x) for x in current_prices[2].T]
-                if "Normal" in normalcheck_b:
-                    avg_b_current_price = [
-                        x
-                        for x in current_prices[2].loc[normalcheck_b[0], :]
-                        if not math.isnan(x)
-                    ]
-                    avg_b_cp = c_game_currency(int(average(avg_b_current_price)))
-                    buyorder_embed.add_field(
-                        name=f"Avg Current Buy Price ({normalcheck_b[0]})",
-                        value=avg_b_cp,
-                        inline=True,
-                    )
+            avg_s_current_price, avg_b_current_price, normalcheck_s, normalcheck_b = get_current_average_s(
+                current_prices)
+            if avg_s_current_price is not None:
+                avg_s_cp = c_game_currency(avg_s_current_price)
+                buyorder_embed.add_field(
+                    name=f"Avg Current Sell Price ({normalcheck_s[0]})",
+                    value=avg_s_cp,
+                    inline=True,
+                )
+            if avg_b_current_price is not None:
+                avg_b_cp = c_game_currency(avg_b_current_price)
+                buyorder_embed.add_field(
+                    name=f"Avg Current Buy Price ({normalcheck_b[0]})",
+                    value=avg_b_cp,
+                    inline=True,
+                )
 
             filename = f'{item.matched.replace("@", "_")}_{datetime.datetime.today().strftime("%Y_%m_%d")}'
 

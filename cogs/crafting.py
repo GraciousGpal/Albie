@@ -4,6 +4,7 @@ from asyncio import gather
 from discord import Embed
 from discord.ext import commands
 
+from libs.constants import support_info
 from libs.item_handler import Item, get_history_data, load_optimized_data, load_language_list_ls
 from libs.utils import download_file_with_fallback, get_thumbnail_url, c_game_currency
 
@@ -131,7 +132,7 @@ class Crafting(commands.Cog):
                     total_cost = cost * item_amount
                     location_p[location] = total_cost
                     text += f"{location}: {c_game_currency(cost)} Volume Sold:\
-					 {c_game_currency(round(item_meta[item_id_][location]['volume'], 1))} Total Cost: {c_game_currency(total_cost)}\n"
+                     {c_game_currency(round(item_meta[item_id_][location]['volume'], 1))} Total Cost: {c_game_currency(total_cost)}\n"
                 embed.add_field(
                     name=self.op_dict[ingre["@uniquename"]]["LocalizedNames"]["EN-US"],
                     value=text,
@@ -143,12 +144,13 @@ class Crafting(commands.Cog):
                 )
                 total += cheapest_location[0]
                 text2 += f"**{self.op_dict[ingre['@uniquename']]['LocalizedNames']['EN-US']} x{item_amount}**\n \
-				Cheapest location: {cheapest_location[1]} Price: {c_game_currency(round(cheapest_location[0]))}\n"
+                Cheapest location: {cheapest_location[1]} Price: {c_game_currency(round(cheapest_location[0]))}\n"
             text2 += (
                 f"\n ***Total Silver Cost***: ```py\n{c_game_currency(round(total))}```"
             )
             embed.add_field(name="Totals:", value=text2, inline=False)
             await ctx.send(embed=embed)
+            await ctx.send(embed=support_info)
         return
 
 

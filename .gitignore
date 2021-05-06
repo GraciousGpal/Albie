@@ -9,11 +9,9 @@ env
 *.pyc
 keys.json
 decom
-libs/complied_libs/setup.py
 data.zip
 venv
 *.db
 *.vscode
-.vscode/settings.json
-decom
-Decom*
+libs/compiled_libs/build
+libs/compiled_libs/search_algo.c*

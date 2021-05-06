@@ -89,6 +89,8 @@ class Item:
         results = jw_search(
             self.item_w, self.cog_self.item_id_score.copy(), self.cog_self.language_list
         )
+        if results["suggestions"][0][0] is None:
+            return
         self.matched = results["suggestions"][0][0]
         self.name = (
             self.cog_self.op_dict[self.matched]["LocalizedNames"]["EN-US"]

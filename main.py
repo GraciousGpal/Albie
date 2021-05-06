@@ -9,7 +9,7 @@ current_path = os.path.dirname(os.path.realpath(__file__))
 
 command_prefix = '+'  # TODO revert back to . for production
 
-client = commands.Bot(
+client = commands.AutoShardedBot(
     command_prefix=commands.when_mentioned_or(*command_prefix), case_insensitive=True
 )
 
