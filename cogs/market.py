@@ -518,7 +518,7 @@ class Market(commands.Cog):
             if item.matched is None:
                 raise ItemNotFound(ctx)
             thumb_url = f"https://render.albiononline.com/v1/item/{item.matched}.png?count=1&quality=1"
-            log.info(item_i, item.matched, item.name, "...matched...")
+            log.info(f"{item.matched}, {item.name}, ...matched...")
             try:
                 current_prices = await c_price_table(item.current_prices)
             except json.decoder.JSONDecodeError:
