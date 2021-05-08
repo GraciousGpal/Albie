@@ -35,7 +35,7 @@ class Prefix(commands.Cog):
             prefix ([string]): [The Prefix the bot is called with]
         """
         try:
-            log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+            log.info(f"{ctx.prefix}{ctx.invoked_with} {ctx.message.content}")
         except TypeError:
             pass
         if ctx.guild is not None:

@@ -427,7 +427,7 @@ class Market(commands.Cog):
         Example usage: .p t6.1 hunter hood or .price t4  hide
         """
         try:
-            log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+            log.info(f"{ctx.prefix}{ctx.invoked_with} {ctx.message.content}")
         except TypeError:
             pass
         if item is None:
@@ -502,7 +502,7 @@ class Market(commands.Cog):
         :return:
         """
         try:
-            log.info(f"{ctx.prefix}{ctx.invoked_with} {[item for item in ctx.kwargs]}")
+            log.info(f"{ctx.prefix}{ctx.invoked_with} {ctx.message.content}")
         except TypeError:
             pass
         if item_i is None:
