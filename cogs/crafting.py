@@ -80,7 +80,7 @@ class Crafting(commands.Cog):
         Calculate the estimated cost of crafting a certain amount of items.
         """
         try:
-            log.info(f"{ctx.prefix}{ctx.invoked_with} {ctx.message.content}")
+            log.info(f"{ctx.message.content}")
         except TypeError:
             pass
         if not str(amount).isdigit():
