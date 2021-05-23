@@ -478,15 +478,25 @@ class Market(commands.Cog):
                 text = ""
 
             avg_s, avg_b, n_s, n_b = get_current_average_s(current_prices)
+            sell_buy_text = f""
+            if avg_s is not None:
+                sell_buy_text += f"Sell Orders({n_s[0][0]}):`{str(avg_s)}`\n"
+            elif avg_b is not None:
+                sell_buy_text += "Buy Orders({n_b[0][0]}):`{str(avg_b)}`"
             buyorder_embed.add_field(name='Averages:',
-                                     value=f"Sell Orders({n_s[0][0]}):`{str(avg_s)}`\nBuy Orders({n_b[0][0]}):`{str(avg_b)}`",
+                                     value=sell_buy_text,
                                      inline=False)
 
             history_data = process_history_data(item.price_history)
             if history_data is not None:
                 avg_p, avg_sv, best_cs = get_avg_stats(history_data)
+                info_text = f""
+                if n_s is not None:
+                    info_text +=f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`"
+                elif n_b is not None:
+                    info_text +=f"Buy Orders({n_b[0][0]}):"
                 buyorder_embed.add_field(name='Historical Averages:',
-                                         value=f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`\nSell Volume({n_b[0][0]}):"
+                                         value=f"{info_text}\nSell Volume({n_s[0][0]}):"
                                                f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
                                          inline=False)
             await ctx.send(embed=buyorder_embed)
