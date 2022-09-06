@@ -492,9 +492,9 @@ class Market(commands.Cog):
                 avg_p, avg_sv, best_cs = get_avg_stats(history_data)
                 info_text = f""
                 if n_s is not None:
-                    info_text +=f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`"
+                    info_text += f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`"
                 elif n_b is not None:
-                    info_text +=f"Buy Orders({n_b[0][0]}):"
+                    info_text += f"Buy Orders({n_b[0][0]}):"
                 buyorder_embed.add_field(name='Historical Averages:',
                                          value=f"{info_text}\nSell Volume({n_s[0][0]}):"
                                                f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",

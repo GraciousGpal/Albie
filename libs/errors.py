@@ -2,8 +2,6 @@ import asyncio
 
 from discord import Embed
 
-from libs.constants import support_info
-
 
 class NoInfoSentToAlbie(Exception):
     """
@@ -31,8 +29,8 @@ class ItemNotFound(Exception):
         self.loop.create_task(self.send_discord_msg())
 
     async def send_discord_msg(self):
+        self.embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
         await self.ctx.send(embed=self.embed)
-        await self.ctx.send(embed=support_info)
 
 
 class NoHistoryDataAvailable(Exception):
@@ -55,5 +53,5 @@ class NoHistoryDataAvailable(Exception):
         self.loop.create_task(self.send_discord_msg())
 
     async def send_discord_msg(self):
+        self.embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
         await self.ctx.send(embed=self.embed)
-        await self.ctx.send(embed=support_info)
