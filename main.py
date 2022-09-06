@@ -1,17 +1,16 @@
 import logging
 import os
 
-from discord import Game
+from discord import Game, Intents
 from discord.ext import commands
 
 # Load config.ini
 current_path = os.path.dirname(os.path.realpath(__file__))
 
 command_prefix = '.'
-
+intents = Intents.default()
 client = commands.AutoShardedBot(
-    command_prefix=commands.when_mentioned_or(*command_prefix), case_insensitive=True
-)
+    command_prefix=commands.when_mentioned_or(*command_prefix), case_insensitive=True, intents=intents)
 
 # Set up logging to discord.log
 logFormatter = logging.Formatter("%(asctime)s [%(name)s] [%(levelname)s]  %(message)s")
@@ -43,7 +42,7 @@ async def on_ready():
     try:
         for filename in os.listdir(current_path + "/cogs"):
             if filename.endswith(".py"):
-                client.load_extension(f"cogs.{filename[:-3]}")
+                await client.load_extension(f"cogs.{filename[:-3]}")
                 log.info(f"Loaded: [{filename[:-3]}]")
     except Exception as e:
         log.error(e)
@@ -78,11 +77,11 @@ async def extension(ctx, option, extension):
     # hello
     try:
         if option == "reload":
-            client.reload_extension(f"cogs.{extension}")
+            await client.reload_extension(f"cogs.{extension}")
         elif option == "load":
-            client.load_extension(f"cogs.{extension}")
+            await client.load_extension(f"cogs.{extension}")
         elif option == "unload":
-            client.unload_extension(f"cogs.{extension}")
+            await client.unload_extension(f"cogs.{extension}")
 
         # Prompt usage method if option is wrong
         else:

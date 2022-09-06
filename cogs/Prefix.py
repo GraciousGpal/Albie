@@ -24,8 +24,8 @@ class Prefix(commands.Cog):
         self.create_table()
 
     @is_guild_owner()
-    @commands.command()
-    async def setPrefix(self, ctx, prefix):
+    @commands.hybrid_command()
+    async def setprefix(self, ctx, prefix):
         """
         Choose the way the bot can be called,
         this command sets a prefix that the bot listens for. e.g. .prefix +
@@ -78,7 +78,7 @@ class Prefix(commands.Cog):
             pref = self.get(message.guild.id)
         else:
             pref = self.get(message.channel.id)
-        return pref if pref is not None else "."
+        return pref if pref is not None else "-"
 
     def connect(self):
         self.sqlite_prefix = create_connection("data/prefix.sqlite")
@@ -119,8 +119,8 @@ class Prefix(commands.Cog):
             c.close()
 
 
-def setup(client):
-    client.add_cog(Prefix(client))
+async def setup(client):
+    await client.add_cog(Prefix(client))
 
 
 def teardown(client):

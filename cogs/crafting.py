@@ -48,11 +48,15 @@ def load_crafting_data(data_url):
         elif isinstance(data["items"][category], dict):
             item = data["items"][category]
             itemdata[item["@uniquename"]] = {
-                "value": item["@itemvalue"],
                 "tier": item["@tier"],
-                "silver_cost": item["craftingrequirements"]["@silver"],
-                "requirements": item["craftingrequirements"]["craftresource"],
             }
+            if "@itemvalue" in item:
+                itemdata[item["@uniquename"]]['value'] = item["@itemvalue"]
+            if "@silver" in item:
+                itemdata[item["@uniquename"]]['silver_cost'] = item["craftingrequirements"]["@silver"]
+            if "craftresource" in item:
+                itemdata[item["@uniquename"]]['requirements'] = item["craftingrequirements"]["craftresource"]
+
     log.info("Item crafting data downloaded")
     return itemdata
 
@@ -74,7 +78,7 @@ class Crafting(commands.Cog):
             "https://raw.githubusercontent.com/broderickhyman/ao-bin-dumps/master/items.json"
         )
 
-    @commands.command(aliases=["c"])
+    @commands.hybrid_command(aliases=["c"])
     async def craft(self, ctx, amount, *, item=None):
         """
         Calculate the estimated cost of crafting a certain amount of items.
@@ -165,8 +169,8 @@ class Crafting(commands.Cog):
         return
 
 
-def setup(client):
-    client.add_cog(Crafting(client))
+async def setup(client):
+    await client.add_cog(Crafting(client))
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-discord.py
+discord.py==2.0.0
 aiohttp
 seaborn
 python-Levenshtein

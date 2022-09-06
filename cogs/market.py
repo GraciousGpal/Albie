@@ -420,7 +420,7 @@ class Market(commands.Cog):
         }
         self.id_list = [item["UniqueName"] for item in self.dict]
 
-    @commands.command(aliases=["pt"])
+    @commands.hybrid_command(aliases=["pt"])
     async def pricestext(self, ctx, *, item=None):
         """
         Gets the price of an item and its history (text format)
@@ -502,7 +502,7 @@ class Market(commands.Cog):
             await ctx.send(embed=buyorder_embed)
             await ctx.send(embed=support_info)
 
-    @commands.command(aliases=["price", "p"])
+    @commands.hybrid_command(aliases=["price", "p"])
     async def prices(self, ctx, *, item_i=None):
         """
         Gets the price of an item and its history
@@ -651,5 +651,5 @@ class Market(commands.Cog):
             await ctx.send(embed=support_info)
 
 
-def setup(client):
-    client.add_cog(Market(client))
+async def setup(client):
+    await client.add_cog(Market(client))
