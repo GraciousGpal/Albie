@@ -4,7 +4,6 @@ from asyncio import gather
 from discord import Embed
 from discord.ext import commands
 
-from libs.constants import support_info
 from libs.item_handler import Item, get_history_data, load_optimized_data, load_language_list_ls
 from libs.utils import download_file_with_fallback, get_thumbnail_url, c_game_currency
 
@@ -164,9 +163,8 @@ class Crafting(commands.Cog):
                 f"\n ***Total Silver Cost***: ```py\n{c_game_currency(round(total))}```"
             )
             embed.add_field(name="Totals:", value=text2, inline=False)
+            embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
             await ctx.send(embed=embed)
-            await ctx.send(embed=support_info)
-        return
 
 
 async def setup(client):

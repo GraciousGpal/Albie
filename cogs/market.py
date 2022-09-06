@@ -15,7 +15,7 @@ from discord import Embed, File
 from discord.ext import commands
 from numpy import nan, isnan
 
-from libs.constants import CITY_COLOURS, QUALITY_TIERS, support_info
+from libs.constants import CITY_COLOURS, QUALITY_TIERS
 from libs.errors import NoInfoSentToAlbie, ItemNotFound
 from libs.item_handler import Item, load_optimized_data, load_language_list_ls
 from libs.utils import c_game_currency
@@ -499,8 +499,8 @@ class Market(commands.Cog):
                                          value=f"{info_text}\nSell Volume({n_s[0][0]}):"
                                                f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
                                          inline=False)
+            buyorder_embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
             await ctx.send(embed=buyorder_embed)
-            await ctx.send(embed=support_info)
 
     @commands.hybrid_command(aliases=["price", "p"])
     async def prices(self, ctx, *, item_i=None):
@@ -647,8 +647,8 @@ class Market(commands.Cog):
                 history_embed.set_footer(
                     text=f"ID: {item.matched} || Best City Sales : {best_cs_str}|| Time: {stop_measuring_time}s\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
                 )
+                history_embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
                 await ctx.send(file=history_file, embed=history_embed)
-            await ctx.send(embed=support_info)
 
 
 async def setup(client):

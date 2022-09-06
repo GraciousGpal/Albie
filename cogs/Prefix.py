@@ -52,6 +52,7 @@ class Prefix(commands.Cog):
                 value=f"Example usage: {str(pref)}prefix <your prefix> ",
                 inline=False,
             )
+            embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
             await ctx.send(embed=embed)
             return
 
@@ -63,6 +64,7 @@ class Prefix(commands.Cog):
                 value=f"All future commands can only be called with this `{prefix}` Prefix e.g. {prefix}help ",
                 inline=False,
             )
+            embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
             await ctx.send(embed=embed)
         else:
             embed = Embed(color=0xFF0000)
@@ -71,6 +73,7 @@ class Prefix(commands.Cog):
                 value=f"Example usage: {str(pref)}prefix <your prefix>",
                 inline=False,
             )
+            embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
             await ctx.send(embed=embed)
 
     def get_prefix(self, ctx, message):  ##first we define get_prefix
