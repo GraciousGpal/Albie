@@ -1,9 +1,8 @@
 import logging
 import os
 
-from discord import Game, Intents, app_commands
+from discord import Game, Intents
 from discord.ext import commands
-import libs.constants as cb
 
 # Load config.ini
 current_path = os.path.dirname(os.path.realpath(__file__))
@@ -26,6 +25,14 @@ class Server(commands.AutoShardedBot):
 
 
 client = Server(command_prefix='.', intents=Intents.default(), case_insensitive=True)
+
+
+async def get_total_users() -> int:
+    count = 0
+    for _guild in client.guilds:
+        for _ in _guild.members:
+            count += 1
+    return count
 
 
 @client.event
@@ -55,7 +62,9 @@ async def on_ready():
     await client.tree.sync()
 
     # Activity to 'Ready'
-    await client.change_presence(activity=Game("Albion Online"))
+    no_of_users = await get_total_users()
+    await client.change_presence(
+        activity=Game(f"Albion with {len(client.guilds)} guilds and serving {no_of_users}+ users"))
 
     # Login message in console
     log.info(f"Logged in as {client.user}.\nConnected to:")
