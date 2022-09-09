@@ -2,6 +2,7 @@ import logging
 from asyncio import gather
 
 from discord import Embed
+from discord.errors import Forbidden
 from discord.ext import commands
 
 from libs.item_handler import Item, get_history_data, load_optimized_data, load_language_list_ls
@@ -98,73 +99,77 @@ class Crafting(commands.Cog):
             )
             return
         item = Item(self, ctx, item=item)
-        async with ctx.channel.typing():
-            item.get_matches()
-            if "@" in item.matched:
-                await ctx.send("Enchanted Items are not supported at the moment")
-                return
-            embed = Embed(title=f"Crafting: {item.name}")
+        try:
+            async with ctx.channel.typing():
+                item.get_matches()
+                if "@" in item.matched:
+                    await ctx.send("Enchanted Items are not supported at the moment")
+                    return
+                embed = Embed(title=f"Crafting: {item.name}")
 
-            embed.set_thumbnail(url=get_thumbnail_url(item.matched))
-            try:
-                items_needed = self.craft_data[item.matched]
-            except KeyError:
-                await ctx.send("This Item is not supported")
-                return
-            if isinstance(items_needed["craft_requirements"], dict):
-                items_needed["craft_requirements"] = [
-                    items_needed["craft_requirements"]
+                embed.set_thumbnail(url=get_thumbnail_url(item.matched))
+                try:
+                    items_needed = self.craft_data[item.matched]
+                except KeyError:
+                    await ctx.send("This Item is not supported")
+                    return
+                if isinstance(items_needed["craft_requirements"], dict):
+                    items_needed["craft_requirements"] = [
+                        items_needed["craft_requirements"]
+                    ]
+
+                task_list = [
+                    get_history_data(x["@uniquename"])
+                    for x in items_needed["craft_requirements"]
                 ]
+                history_data = await gather(*task_list)
+                item_meta = {}
+                text2 = ""
+                total = 0
+                for ingred in history_data:
+                    for locationdata in ingred:
+                        item_meta[locationdata["item_id"]] = {}
+                    for locationdata in ingred:
+                        prices = [x["avg_price"] for x in locationdata["data"]]
+                        item_count = [x["item_count"] for x in locationdata["data"]]
+                        avg_p = sum(prices) / len(prices)
+                        avg_count = sum(item_count) / len(item_count)
+                        item_meta[locationdata["item_id"]][locationdata["location"]] = {
+                            "avg_price": avg_p,
+                            "volume": avg_count,
+                        }
+                for ingre in items_needed["craft_requirements"]:
+                    location_p = {}
+                    item_amount = int(ingre["@count"]) * amount
+                    text = f"Amount: {item_amount} Cost:\n"
+                    item_id_ = ingre["@uniquename"]
+                    for location in item_meta[item_id_]:
+                        cost = round(item_meta[item_id_][location]["avg_price"])
+                        total_cost = cost * item_amount
+                        location_p[location] = total_cost
+                        text += f"{location}: `{c_game_currency(cost)}` Volume Sold:\
+                         {c_game_currency(round(item_meta[item_id_][location]['volume'], 1))} Total Cost: `{c_game_currency(total_cost)}`\n"
+                    embed.add_field(
+                        name=self.op_dict[ingre["@uniquename"]]["LocalizedNames"]["EN-US"],
+                        value=text,
+                        inline=False,
+                    )
 
-            task_list = [
-                get_history_data(x["@uniquename"])
-                for x in items_needed["craft_requirements"]
-            ]
-            history_data = await gather(*task_list)
-            item_meta = {}
-            text2 = ""
-            total = 0
-            for ingred in history_data:
-                for locationdata in ingred:
-                    item_meta[locationdata["item_id"]] = {}
-                for locationdata in ingred:
-                    prices = [x["avg_price"] for x in locationdata["data"]]
-                    item_count = [x["item_count"] for x in locationdata["data"]]
-                    avg_p = sum(prices) / len(prices)
-                    avg_count = sum(item_count) / len(item_count)
-                    item_meta[locationdata["item_id"]][locationdata["location"]] = {
-                        "avg_price": avg_p,
-                        "volume": avg_count,
-                    }
-            for ingre in items_needed["craft_requirements"]:
-                location_p = {}
-                item_amount = int(ingre["@count"]) * amount
-                text = f"Amount: {item_amount} Cost:\n"
-                item_id_ = ingre["@uniquename"]
-                for location in item_meta[item_id_]:
-                    cost = round(item_meta[item_id_][location]["avg_price"])
-                    total_cost = cost * item_amount
-                    location_p[location] = total_cost
-                    text += f"{location}: `{c_game_currency(cost)}` Volume Sold:\
-                     {c_game_currency(round(item_meta[item_id_][location]['volume'], 1))} Total Cost: `{c_game_currency(total_cost)}`\n"
-                embed.add_field(
-                    name=self.op_dict[ingre["@uniquename"]]["LocalizedNames"]["EN-US"],
-                    value=text,
-                    inline=False,
+                    cheapest_location = min(
+                        [(location_p[x], x) for x in location_p], key=lambda t: t[0]
+                    )
+                    total += cheapest_location[0]
+                    text2 += f"**{self.op_dict[ingre['@uniquename']]['LocalizedNames']['EN-US']} x{item_amount}**\n \
+                    Cheapest location: {cheapest_location[1]} Price: `{c_game_currency(round(cheapest_location[0]))}`\n"
+                text2 += (
+                    f"\n ***Total Silver Cost***: ```py\n{c_game_currency(round(total))}```"
                 )
-
-                cheapest_location = min(
-                    [(location_p[x], x) for x in location_p], key=lambda t: t[0]
-                )
-                total += cheapest_location[0]
-                text2 += f"**{self.op_dict[ingre['@uniquename']]['LocalizedNames']['EN-US']} x{item_amount}**\n \
-                Cheapest location: {cheapest_location[1]} Price: `{c_game_currency(round(cheapest_location[0]))}`\n"
-            text2 += (
-                f"\n ***Total Silver Cost***: ```py\n{c_game_currency(round(total))}```"
-            )
-            embed.add_field(name="Totals:", value=text2, inline=False)
-            embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
-            await ctx.send(embed=embed)
+                embed.add_field(name="Totals:", value=text2, inline=False)
+                embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
+                await ctx.send(embed=embed)
+        except Forbidden:
+            await ctx.author.send(
+                "Albie was unable to finish the command, due to missing permissions. Check your discord Settings")
 
 
 async def setup(client):

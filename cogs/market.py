@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 from discord import Embed, File
+from discord.errors import Forbidden
 from discord.ext import commands
 from numpy import nan, isnan
 
@@ -436,71 +437,75 @@ class Market(commands.Cog):
             )
             return
         item = Item(self, ctx, item=item)
-        async with ctx.channel.typing():
-            item.get_matches()
-            await item.get_data()
-            try:
-                current_prices = await c_price_table(item.current_prices)
-            except json.decoder.JSONDecodeError:
-                raise NoInfoSentToAlbie
-            thumb_url = f"https://render.albiononline.com/v1/item/{item.matched}.png?count=1&quality=1"
-            # Start embed object
-            title = f"{item.name} (Enchant:{item.enchant})\n"
-            buyorder_embed = Embed(
-                color=0x98FB98,
-                title=title,
-                url=f"https://www.albiononline2d.com/en/item/id/{item.matched}",
-            )
-            text = ''
-            buyorder_embed.set_thumbnail(url=thumb_url)
-            buyorder_embed.add_field(name='Sell Orders:', value='======', inline=False)
-            for city, city_u in zip(current_prices[0], current_prices[1]):
-                for quality in current_prices[0][city].index:
-                    value = current_prices[0][city][quality]
-                    if isnan(value):
-                        continue
-                    updated_ss = current_prices[1][city_u][quality]
-                    updated = updated_ss.split('\n')[1]
-                    text += f"[{quality[0]}]: `{int(value)}` {updated}\n"
-                buyorder_embed.add_field(name=city, value=text, inline=True)
-                text = ""
+        try:
+            async with ctx.channel.typing():
+                item.get_matches()
+                await item.get_data()
+                try:
+                    current_prices = await c_price_table(item.current_prices)
+                except json.decoder.JSONDecodeError:
+                    raise NoInfoSentToAlbie
+                thumb_url = f"https://render.albiononline.com/v1/item/{item.matched}.png?count=1&quality=1"
+                # Start embed object
+                title = f"{item.name} (Enchant:{item.enchant})\n"
+                buyorder_embed = Embed(
+                    color=0x98FB98,
+                    title=title,
+                    url=f"https://www.albiononline2d.com/en/item/id/{item.matched}",
+                )
+                text = ''
+                buyorder_embed.set_thumbnail(url=thumb_url)
+                buyorder_embed.add_field(name='Sell Orders:', value='======', inline=False)
+                for city, city_u in zip(current_prices[0], current_prices[1]):
+                    for quality in current_prices[0][city].index:
+                        value = current_prices[0][city][quality]
+                        if isnan(value):
+                            continue
+                        updated_ss = current_prices[1][city_u][quality]
+                        updated = updated_ss.split('\n')[1]
+                        text += f"[{quality[0]}]: `{int(value)}` {updated}\n"
+                    buyorder_embed.add_field(name=city, value=text, inline=True)
+                    text = ""
 
-            buyorder_embed.add_field(name='Buy Orders:', value='======', inline=False)
-            for city, city_u in zip(current_prices[2], current_prices[3]):
-                for quality in current_prices[2][city].index:
-                    value = current_prices[2][city][quality]
-                    if isnan(value):
-                        continue
-                    updated_s = current_prices[3][city_u][quality]
-                    updated = updated_s.split('\n')[1]
-                    text += f"[{quality[0]}]: `{int(value)}` {updated}\n"
-                buyorder_embed.add_field(name=city, value=text, inline=True)
-                text = ""
+                buyorder_embed.add_field(name='Buy Orders:', value='======', inline=False)
+                for city, city_u in zip(current_prices[2], current_prices[3]):
+                    for quality in current_prices[2][city].index:
+                        value = current_prices[2][city][quality]
+                        if isnan(value):
+                            continue
+                        updated_s = current_prices[3][city_u][quality]
+                        updated = updated_s.split('\n')[1]
+                        text += f"[{quality[0]}]: `{int(value)}` {updated}\n"
+                    buyorder_embed.add_field(name=city, value=text, inline=True)
+                    text = ""
 
-            avg_s, avg_b, n_s, n_b = get_current_average_s(current_prices)
-            sell_buy_text = f""
-            if avg_s is not None:
-                sell_buy_text += f"Sell Orders({n_s[0][0]}):`{str(avg_s)}`\n"
-            elif avg_b is not None:
-                sell_buy_text += "Buy Orders({n_b[0][0]}):`{str(avg_b)}`"
-            buyorder_embed.add_field(name='Averages:',
-                                     value=sell_buy_text,
-                                     inline=False)
-
-            history_data = process_history_data(item.price_history)
-            if history_data is not None:
-                avg_p, avg_sv, best_cs = get_avg_stats(history_data)
-                info_text = f""
-                if n_s is not None:
-                    info_text += f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`"
-                elif n_b is not None:
-                    info_text += f"Buy Orders({n_b[0][0]}):"
-                buyorder_embed.add_field(name='Historical Averages:',
-                                         value=f"{info_text}\nSell Volume({n_s[0][0] if n_s is not None else None}):"
-                                               f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
+                avg_s, avg_b, n_s, n_b = get_current_average_s(current_prices)
+                sell_buy_text = f""
+                if avg_s is not None:
+                    sell_buy_text += f"Sell Orders({n_s[0][0]}):`{str(avg_s)}`\n"
+                elif avg_b is not None:
+                    sell_buy_text += "Buy Orders({n_b[0][0]}):`{str(avg_b)}`"
+                buyorder_embed.add_field(name='Averages:',
+                                         value=sell_buy_text,
                                          inline=False)
-            buyorder_embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
-            await ctx.send(embed=buyorder_embed)
+
+                history_data = process_history_data(item.price_history)
+                if history_data is not None:
+                    avg_p, avg_sv, best_cs = get_avg_stats(history_data)
+                    info_text = f""
+                    if n_s is not None:
+                        info_text += f"Sell Orders({n_s[0][0]}):`{str(avg_p)}`"
+                    elif n_b is not None:
+                        info_text += f"Buy Orders({n_b[0][0]}):"
+                    buyorder_embed.add_field(name='Historical Averages:',
+                                             value=f"{info_text}\nSell Volume({n_s[0][0] if n_s is not None else None}):"
+                                                   f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
+                                             inline=False)
+                buyorder_embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
+                await ctx.send(embed=buyorder_embed)
+        except Forbidden:
+            await ctx.author.send(
+                "Albie was unable to finish the command, due to missing permissions. Check your discord Settings")
 
     @commands.hybrid_command(aliases=["price", "p"])
     async def prices(self, ctx, *, item_i):
@@ -522,133 +527,138 @@ class Market(commands.Cog):
             return
         start_measuring_time = time()
         item = Item(self, ctx, item=item_i)
-        async with ctx.channel.typing():
-            item.get_matches()
-            await item.get_data()
-            if item.matched is None:
-                raise ItemNotFound(ctx)
-            thumb_url = f"https://render.albiononline.com/v1/item/{item.matched}.png?count=1&quality=1"
-            log.info(f"{item.matched}, {item.name}, ...matched...")
-            try:
-                current_prices = await c_price_table(item.current_prices)
-            except json.decoder.JSONDecodeError:
-                embed = Embed(color=0xFF0000)
-                embed.set_thumbnail(
-                    url="http://clipart-library.com/images/kTMK4787c.jpg"
-                )
-                embed.add_field(
-                    name="No Information Sent to Albie Bot",
-                    value="Looks like the Albion-Data Project didn't send anything to Poor Albie Bot,\
-                         They might be under heavy load. Try searching again,\
-                         if this error persists drop me discord message.",
-                    inline=False,
-                )
-                await ctx.send(embed=embed)
+        try:
+            async with ctx.channel.typing():
+                item.get_matches()
+                await item.get_data()
+                if item.matched is None:
+                    raise ItemNotFound(ctx)
+                thumb_url = f"https://render.albiononline.com/v1/item/{item.matched}.png?count=1&quality=1"
+                log.info(f"{item.matched}, {item.name}, ...matched...")
+                try:
+                    current_prices = await c_price_table(item.current_prices)
+                except json.decoder.JSONDecodeError:
+                    embed = Embed(color=0xFF0000)
+                    embed.set_thumbnail(
+                        url="http://clipart-library.com/images/kTMK4787c.jpg"
+                    )
+                    embed.add_field(
+                        name="No Information Sent to Albie Bot",
+                        value="Looks like the Albion-Data Project didn't send anything to Poor Albie Bot,\
+                             They might be under heavy load. Try searching again,\
+                             if this error persists drop me discord message.",
+                        inline=False,
+                    )
+                    await ctx.send(embed=embed)
 
-            current_buffer = await create_sell_buy_order(current_prices)
+                current_buffer = await create_sell_buy_order(current_prices)
 
-            # Historical Data
-            try:
-                history_buffer, h_data = await full_graph(item.price_history)
-            except json.decoder.JSONDecodeError:
-                embed = Embed(color=0xFF0000)
-                embed.set_thumbnail(
-                    url="http://clipart-library.com/images/kTMK4787c.jpg"
-                )
-                embed.add_field(
-                    name="No Information Sent to Albie Bot",
-                    value="Looks like the Albion-Data Project didnt send anything to Poor Albie Bot,\
-                         They might be under heavy load.\
-                         Try seaching again, if this error persists drop me discord message.",
-                    inline=False,
-                )
-                await ctx.send(embed=embed)
+                # Historical Data
+                try:
+                    history_buffer, h_data = await full_graph(item.price_history)
+                except json.decoder.JSONDecodeError:
+                    embed = Embed(color=0xFF0000)
+                    embed.set_thumbnail(
+                        url="http://clipart-library.com/images/kTMK4787c.jpg"
+                    )
+                    embed.add_field(
+                        name="No Information Sent to Albie Bot",
+                        value="Looks like the Albion-Data Project didnt send anything to Poor Albie Bot,\
+                             They might be under heavy load.\
+                             Try seaching again, if this error persists drop me discord message.",
+                        inline=False,
+                    )
+                    await ctx.send(embed=embed)
 
-            # Get avg_stats
-            average_sell_price, avg_sell_volume, best_city_to_sell = get_avg_stats(
-                h_data
-            )
-
-            best_cs_str = (
-                f"{best_city_to_sell[0]} ({c_game_currency(best_city_to_sell[1])})"
-            )
-
-            # Start embed object
-            title = f"{item.name} (Enchant:{item.enchant})\n"
-            buyorder_embed = Embed(
-                color=0x98FB98,
-                title=title,
-                url=f"https://www.albiononline2d.com/en/item/id/{item.matched}",
-            )
-            buyorder_embed.set_thumbnail(url=thumb_url)
-
-            # Current Data
-            avg_s_current_price, avg_b_current_price, normalcheck_s, normalcheck_b = get_current_average_s(
-                current_prices)
-            if avg_s_current_price is not None:
-                avg_s_cp = c_game_currency(avg_s_current_price)
-                buyorder_embed.add_field(
-                    name=f"Avg Current Sell Price ({normalcheck_s[0]})",
-                    value=avg_s_cp,
-                    inline=True,
-                )
-            if avg_b_current_price is not None:
-                avg_b_cp = c_game_currency(avg_b_current_price)
-                buyorder_embed.add_field(
-                    name=f"Avg Current Buy Price ({normalcheck_b[0]})",
-                    value=avg_b_cp,
-                    inline=True,
+                # Get avg_stats
+                average_sell_price, avg_sell_volume, best_city_to_sell = get_avg_stats(
+                    h_data
                 )
 
-            filename = f'{item.matched.replace("@", "_")}_{datetime.datetime.today().strftime("%Y_%m_%d")}'
-
-            if current_buffer is not None:
-                current_buffer.seek(0)
-                current_file = File(current_buffer, filename=f"{filename}.png")
-                current_buffer.close()
-                buyorder_embed.set_image(url=f"attachment://{filename}.png")
-            else:
-                buyorder_embed.description = "No Current Data Available!"
-                buyorder_embed.colour = 0xFF0000
-
-            history_embed = Embed(color=0x98FB98)
-            if history_buffer is not None and h_data:
-                history_buffer.seek(0)
-                history_file = File(history_buffer, filename=f"{filename}H.png")
-                history_buffer.close()
-                history_embed.set_image(url=f"attachment://{filename}H.png")
-
-                history_embed.add_field(
-                    name="Avg Historical Price (Normal)",
-                    value=average_sell_price,
-                    inline=True,
+                best_cs_str = (
+                    f"{best_city_to_sell[0]} ({c_game_currency(best_city_to_sell[1])})"
                 )
-                history_embed.add_field(
-                    name="Avg Sell Volume", value=avg_sell_volume, inline=True
-                )
-            history_embed.set_footer(
-                text=f"ID: {item.matched} || Best City Sales : {best_cs_str} ||\
-                     |>\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
-            )
-            if current_buffer is not None:
-                await ctx.send(file=current_file, embed=buyorder_embed)
-            else:
-                await ctx.send(embed=buyorder_embed)
 
-            stop_measuring_time = round(time() - start_measuring_time, 1)
-            if history_buffer is None or not h_data:
-                history_embed.colour = 0xFF0000
-                history_embed.description = "No History Data available!"
+                # Start embed object
+                title = f"{item.name} (Enchant:{item.enchant})\n"
+                buyorder_embed = Embed(
+                    color=0x98FB98,
+                    title=title,
+                    url=f"https://www.albiononline2d.com/en/item/id/{item.matched}",
+                )
+                buyorder_embed.set_thumbnail(url=thumb_url)
+
+                # Current Data
+                avg_s_current_price, avg_b_current_price, normalcheck_s, normalcheck_b = get_current_average_s(
+                    current_prices)
+                if avg_s_current_price is not None:
+                    avg_s_cp = c_game_currency(avg_s_current_price)
+                    buyorder_embed.add_field(
+                        name=f"Avg Current Sell Price ({normalcheck_s[0]})",
+                        value=avg_s_cp,
+                        inline=True,
+                    )
+                if avg_b_current_price is not None:
+                    avg_b_cp = c_game_currency(avg_b_current_price)
+                    buyorder_embed.add_field(
+                        name=f"Avg Current Buy Price ({normalcheck_b[0]})",
+                        value=avg_b_cp,
+                        inline=True,
+                    )
+
+                filename = f'{item.matched.replace("@", "_")}_{datetime.datetime.today().strftime("%Y_%m_%d")}'
+
+                if current_buffer is not None:
+                    current_buffer.seek(0)
+                    current_file = File(current_buffer, filename=f"{filename}.png")
+                    current_buffer.close()
+                    buyorder_embed.set_image(url=f"attachment://{filename}.png")
+                else:
+                    buyorder_embed.description = "No Current Data Available!"
+                    buyorder_embed.colour = 0xFF0000
+
+                history_embed = Embed(color=0x98FB98)
+                if history_buffer is not None and h_data:
+                    history_buffer.seek(0)
+                    history_file = File(history_buffer, filename=f"{filename}H.png")
+                    history_buffer.close()
+                    history_embed.set_image(url=f"attachment://{filename}H.png")
+
+                    history_embed.add_field(
+                        name="Avg Historical Price (Normal)",
+                        value=average_sell_price,
+                        inline=True,
+                    )
+                    history_embed.add_field(
+                        name="Avg Sell Volume", value=avg_sell_volume, inline=True
+                    )
                 history_embed.set_footer(
-                    text=f"ID: {item.matched} || Best City Sales : {best_cs_str}|| Time: {stop_measuring_time}s\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
+                    text=f"ID: {item.matched} || Best City Sales : {best_cs_str} ||\
+                         |>\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
                 )
-                await ctx.send(embed=history_embed)
-            else:
-                history_embed.set_footer(
-                    text=f"ID: {item.matched} || Best City Sales : {best_cs_str}|| Time: {stop_measuring_time}s\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
-                )
-                history_embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
-                await ctx.send(file=history_file, embed=history_embed)
+                if current_buffer is not None:
+                    await ctx.send(file=current_file, embed=buyorder_embed)
+                else:
+                    await ctx.send(embed=buyorder_embed)
+
+                stop_measuring_time = round(time() - start_measuring_time, 1)
+                if history_buffer is None or not h_data:
+                    history_embed.colour = 0xFF0000
+                    history_embed.description = "No History Data available!"
+                    history_embed.set_footer(
+                        text=f"ID: {item.matched} || Best City Sales : {best_cs_str}|| Time: {stop_measuring_time}s\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
+                    )
+                    await ctx.send(embed=history_embed)
+                else:
+                    history_embed.set_footer(
+                        text=f"ID: {item.matched} || Best City Sales : {best_cs_str}|| Time: {stop_measuring_time}s\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
+                    )
+                    history_embed.set_footer(
+                        text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
+                    await ctx.send(file=history_file, embed=history_embed)
+        except Forbidden:
+            await ctx.author.send(
+                "Albie was unable to finish the command, due to missing permissions. Check your discord Settings")
 
 
 async def setup(client):
