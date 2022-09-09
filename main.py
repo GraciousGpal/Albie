@@ -36,7 +36,7 @@ async def get_total_users() -> int:
     return count
 
 
-async def update_albie_presence(client):
+async def update_albie_presence(client: Server) -> None:
     while True:
         no_of_users = await get_total_users()
         no_of_guilds = len(client.guilds)
@@ -46,7 +46,7 @@ async def update_albie_presence(client):
 
 
 @client.event
-async def on_ready():
+async def on_ready() -> None:
     """Things to do when bot is ready.
 
     - Load all cogs in folder /cogs.

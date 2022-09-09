@@ -1,4 +1,5 @@
 import logging
+import typing
 from asyncio import gather
 
 from discord import Embed
@@ -11,7 +12,7 @@ from libs.utils import download_file_with_fallback, get_thumbnail_url, c_game_cu
 log = logging.getLogger(__name__)
 
 
-def load_crafting_data(data_url):
+def load_crafting_data(data_url) -> typing.Dict:
     """
     Download and format crafting data for items
     """
@@ -62,7 +63,7 @@ def load_crafting_data(data_url):
 
 
 class Crafting(commands.Cog):
-    def __init__(self, client):
+    def __init__(self, client) -> None:
         self.client = client
         if not hasattr(self, 'item_url') or not hasattr(self, 'op_dict'):
             self.item_url = "https://raw.githubusercontent.com/broderickhyman/ao-bin-dumps/master/formatted/items.json"
@@ -79,7 +80,7 @@ class Crafting(commands.Cog):
         )
 
     @commands.hybrid_command(aliases=["c"])
-    async def craft(self, ctx, amount, *, item):
+    async def craft(self, ctx, amount, *, item) -> None:
         """
         Calculate the estimated cost of crafting a certain amount of items.
         """
@@ -174,7 +175,3 @@ class Crafting(commands.Cog):
 
 async def setup(client):
     await client.add_cog(Crafting(client))
-
-
-if __name__ == "__main__":
-    pass

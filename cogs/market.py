@@ -422,7 +422,7 @@ class Market(commands.Cog):
         self.id_list = [item["UniqueName"] for item in self.dict]
 
     @commands.hybrid_command(aliases=["pt"])
-    async def pricestext(self, ctx, *, item):
+    async def pricestext(self, ctx, *, item) -> None:
         """
         Gets the price of an item and its history (text format)
         Example usage: .p t6.1 hunter hood or .price t4  hide
@@ -502,13 +502,13 @@ class Market(commands.Cog):
                                                    f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
                                              inline=False)
                 buyorder_embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
-                await ctx.send(embed=buyorder_embed)
+                await ctx.channel.send(embed=buyorder_embed)
         except Forbidden:
             await ctx.author.send(
                 "Albie was unable to finish the command, due to missing permissions. Check your discord Settings")
 
     @commands.hybrid_command(aliases=["price", "p"])
-    async def prices(self, ctx, *, item_i):
+    async def prices(self, ctx, *, item_i) -> None:
         """
         Gets the price of an item and its history
         Example usage: .p t6.1 hunter hood or .price t4  hide
@@ -637,9 +637,9 @@ class Market(commands.Cog):
                          |>\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
                 )
                 if current_buffer is not None:
-                    await ctx.send(file=current_file, embed=buyorder_embed)
+                    await ctx.channel.send(file=current_file, embed=buyorder_embed)
                 else:
-                    await ctx.send(embed=buyorder_embed)
+                    await ctx.channel.send(embed=buyorder_embed)
 
                 stop_measuring_time = round(time() - start_measuring_time, 1)
                 if history_buffer is None or not h_data:
@@ -648,14 +648,14 @@ class Market(commands.Cog):
                     history_embed.set_footer(
                         text=f"ID: {item.matched} || Best City Sales : {best_cs_str}|| Time: {stop_measuring_time}s\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
                     )
-                    await ctx.send(embed=history_embed)
+                    await ctx.channel.send(embed=history_embed)
                 else:
                     history_embed.set_footer(
                         text=f"ID: {item.matched} || Best City Sales : {best_cs_str}|| Time: {stop_measuring_time}s\nSuggested Searches: {str([self.op_dict[x[0]]['LocalizedNames']['EN-US'] for x in item.results]).replace('[', '').replace(']', '')}"
                     )
                     history_embed.set_footer(
                         text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
-                    await ctx.send(file=history_file, embed=history_embed)
+                    await ctx.channel.send(file=history_file, embed=history_embed)
         except Forbidden:
             await ctx.author.send(
                 "Albie was unable to finish the command, due to missing permissions. Check your discord Settings")
