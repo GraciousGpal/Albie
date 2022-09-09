@@ -1,16 +1,12 @@
 import logging
 import os
 
-from discord import Game, Intents
+from discord import Game, Intents, app_commands
 from discord.ext import commands
+import libs.constants as cb
 
 # Load config.ini
 current_path = os.path.dirname(os.path.realpath(__file__))
-
-command_prefix = '.'
-intents = Intents.default()
-client = commands.AutoShardedBot(
-    command_prefix=commands.when_mentioned_or(*command_prefix), case_insensitive=True, intents=intents)
 
 # Set up logging to discord.log
 logFormatter = logging.Formatter("%(asctime)s [%(name)s] [%(levelname)s]  %(message)s")
@@ -22,6 +18,14 @@ log.addHandler(file_handler)
 consoleHandler = logging.StreamHandler()
 consoleHandler.setFormatter(logFormatter)
 log.addHandler(consoleHandler)
+
+
+class Server(commands.AutoShardedBot):
+    def __init__(self, command_prefix, intents, *args, **kwargs):
+        super().__init__(command_prefix=command_prefix, intents=intents, *args, **kwargs)
+
+
+client = Server(command_prefix='.', intents=Intents.default(), case_insensitive=True)
 
 
 @client.event
@@ -47,6 +51,9 @@ async def on_ready():
     except Exception as e:
         log.error(e)
 
+    # After everything is loaded sync commands
+    await client.tree.sync()
+
     # Activity to 'Ready'
     await client.change_presence(activity=Game("Albion Online"))
 
@@ -61,43 +68,6 @@ async def on_ready():
             break
 
 
-@client.command(hidden=True)
-async def extension(ctx, option, extension):
-    """Reload, load, or unload extensions.
-
-    - Usage: <command-prefix> extension <option> <cog's name>
-    - <option> : load, unload, reload
-    - Only allowable if user is adminUser.
-    """
-
-    # Check if user is in adminUsers
-    if str(ctx.author.id) not in [str(138684247853498369)]:
-        await ctx.send(f"You do not have permission to {option} extensions.")
-        return
-    # hello
-    try:
-        if option == "reload":
-            await client.reload_extension(f"cogs.{extension}")
-        elif option == "load":
-            await client.load_extension(f"cogs.{extension}")
-        elif option == "unload":
-            await client.unload_extension(f"cogs.{extension}")
-
-        # Prompt usage method if option is wrong
-        else:
-            await ctx.send(
-                f"Usage: `{command_prefix[0]}extension <option> <extension>`\nOptions: `reload, load, unload`"
-            )
-            return
-
-    except Exception as e:
-        await ctx.send(f"{extension} extension {option} FAILED.:\n```{e}```")
-        return
-
-    # Success message
-    await ctx.send(f"{extension} extension {option.upper()}ED.")
-
-
-# Copy from your Discord developer portal
-token = os.environ['DISCORDAPI']
-client.run(token)
+if __name__ == "__main__":
+    token = os.environ['DISCORDAPI']
+    client.run(token)
