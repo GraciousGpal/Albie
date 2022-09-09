@@ -496,7 +496,7 @@ class Market(commands.Cog):
                 elif n_b is not None:
                     info_text += f"Buy Orders({n_b[0][0]}):"
                 buyorder_embed.add_field(name='Historical Averages:',
-                                         value=f"{info_text}\nSell Volume({n_s[0][0]}):"
+                                         value=f"{info_text}\nSell Volume({n_s[0][0] if n_s is not None else None}):"
                                                f"`{str(avg_sv)}`\n Best City Sales: {best_cs[0]}: `{c_game_currency(best_cs[1])}` (Sell Volume)",
                                          inline=False)
             buyorder_embed.set_footer(text="💬 Want to help Improve the bot ? Go to: github.com/GraciousGpal/Albie")
