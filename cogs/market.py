@@ -421,7 +421,7 @@ class Market(commands.Cog):
         self.id_list = [item["UniqueName"] for item in self.dict]
 
     @commands.hybrid_command(aliases=["pt"])
-    async def pricestext(self, ctx, *, item=None):
+    async def pricestext(self, ctx, *, item):
         """
         Gets the price of an item and its history (text format)
         Example usage: .p t6.1 hunter hood or .price t4  hide
@@ -432,7 +432,7 @@ class Market(commands.Cog):
             pass
         if item is None:
             await ctx.send(
-                "Please enter an object to be searched:\n e.g  ```.p t6.1 hunter hood\n.price t4 hide ```"
+                "Please enter an object to be searched:\n e.g  ```/pricestext t6.1 hunter hood\n```"
             )
             return
         item = Item(self, ctx, item=item)
@@ -503,7 +503,7 @@ class Market(commands.Cog):
             await ctx.send(embed=buyorder_embed)
 
     @commands.hybrid_command(aliases=["price", "p"])
-    async def prices(self, ctx, *, item_i=None):
+    async def prices(self, ctx, *, item_i):
         """
         Gets the price of an item and its history
         Example usage: .p t6.1 hunter hood or .price t4  hide
@@ -517,7 +517,7 @@ class Market(commands.Cog):
             pass
         if item_i is None:
             await ctx.send(
-                "Please enter an object to be searched:\n e.g  ```.p t6.1 hunter hood\n.price t4 hide ```"
+                "Please enter an object to be searched:\n e.g  ```/prices t4 hide ```"
             )
             return
         start_measuring_time = time()

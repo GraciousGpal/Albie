@@ -78,7 +78,7 @@ class Crafting(commands.Cog):
         )
 
     @commands.hybrid_command(aliases=["c"])
-    async def craft(self, ctx, amount, *, item=None):
+    async def craft(self, ctx, amount, *, item):
         """
         Calculate the estimated cost of crafting a certain amount of items.
         """
