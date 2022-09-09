@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -35,6 +36,15 @@ async def get_total_users() -> int:
     return count
 
 
+async def update_albie_presence(client):
+    while True:
+        no_of_users = await get_total_users()
+        no_of_guilds = len(client.guilds)
+        await client.change_presence(
+            activity=Game(f"Albion with {no_of_guilds} guilds and serving {no_of_users}+ users"))
+        await asyncio.sleep(360)
+
+
 @client.event
 async def on_ready():
     """Things to do when bot is ready.
@@ -61,10 +71,8 @@ async def on_ready():
     # After everything is loaded sync commands
     await client.tree.sync()
 
-    # Activity to 'Ready'
-    no_of_users = await get_total_users()
-    await client.change_presence(
-        activity=Game(f"Albion with {len(client.guilds)} guilds and serving {no_of_users}+ users"))
+    # Activity to 'Albie Stats'
+    client.loop.create_task(update_albie_presence(client))
 
     # Login message in console
     log.info(f"Logged in as {client.user}.\nConnected to:")
